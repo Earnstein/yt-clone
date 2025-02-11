@@ -8,25 +8,20 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import { Skeleton } from "./ui/skeleton";
 
 interface Props {
   value?: string | null;
   isLoading?: boolean;
-  onSelect: (value: string | null) => void;
   data: {
     value: string;
     label: string;
   }[];
 }
 
-export const FilterCarousel: React.FC<Props> = ({
-  value,
-  isLoading,
-  onSelect,
-  data,
-}) => {
+export const FilterCarousel: React.FC<Props> = ({ value, isLoading, data }) => {
   const [api, setApi] = useState<CarouselApi | null>(null);
   const [countState, setCountState] = useState({
     current: 0,
@@ -71,17 +66,16 @@ export const FilterCarousel: React.FC<Props> = ({
       >
         <CarouselContent className="-ml-3">
           {!isLoading && (
-            <CarouselItem
-              className="pl-3 basis-auto"
-              onClick={() => onSelect(null)}
-            >
-              <Badge
-                variant={value === null ? "default" : "secondary"}
-                className="px-3 py-1 text-xs whitespace-nowrap rounded-lg cursor-pointer sm:text-sm"
-              >
-                All
-              </Badge>
-            </CarouselItem>
+            <Link href="/">
+              <CarouselItem className="pl-3 basis-auto">
+                <Badge
+                  variant={value === null ? "default" : "secondary"}
+                  className="px-3 py-1 text-xs whitespace-nowrap rounded-lg cursor-pointer sm:text-sm"
+                >
+                  All
+                </Badge>
+              </CarouselItem>
+            </Link>
           )}
           {isLoading &&
             Array.from({ length: 14 }).map((_, index) => (
@@ -93,18 +87,16 @@ export const FilterCarousel: React.FC<Props> = ({
             ))}
           {!isLoading &&
             data.map((content) => (
-              <CarouselItem
-                key={content.value}
-                className="pl-3 basis-auto"
-                onClick={() => onSelect(content.value)}
-              >
-                <Badge
-                  variant={value === content.value ? "default" : "secondary"}
-                  className="px-3 py-1 text-xs whitespace-nowrap rounded-lg cursor-pointer sm:text-sm"
-                >
-                  {content.label}
-                </Badge>
-              </CarouselItem>
+              <Link key={content.value} href={`/?categoryId=${content.value}`}>
+                <CarouselItem className="pl-3 basis-auto">
+                  <Badge
+                    variant={value === content.value ? "default" : "secondary"}
+                    className="px-3 py-1 text-xs whitespace-nowrap rounded-lg cursor-pointer sm:text-sm"
+                  >
+                    {content.label}
+                  </Badge>
+                </CarouselItem>
+              </Link>
             ))}
         </CarouselContent>
         <CarouselPrevious className="left-0 z-20" />
