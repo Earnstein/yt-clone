@@ -8,7 +8,6 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { cn } from "@/lib/utils";
-import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import { Skeleton } from "./ui/skeleton";
 
@@ -72,16 +71,17 @@ export const FilterCarousel: React.FC<Props> = ({
       >
         <CarouselContent className="-ml-3">
           {!isLoading && (
-            <Link href="/" onClick={() => onSelect(null)}>
-              <CarouselItem className="pl-3 basis-auto">
-                <Badge
-                  variant={value === null ? "default" : "secondary"}
-                  className="px-3 py-1 text-xs whitespace-nowrap rounded-lg cursor-pointer sm:text-sm"
-                >
-                  All
-                </Badge>
-              </CarouselItem>
-            </Link>
+            <CarouselItem
+              className="pl-3 basis-auto"
+              onClick={() => onSelect(null)}
+            >
+              <Badge
+                variant={value === null ? "default" : "secondary"}
+                className="px-3 py-1 text-xs whitespace-nowrap rounded-lg cursor-pointer sm:text-sm"
+              >
+                All
+              </Badge>
+            </CarouselItem>
           )}
           {isLoading &&
             Array.from({ length: 14 }).map((_, index) => (
@@ -93,20 +93,18 @@ export const FilterCarousel: React.FC<Props> = ({
             ))}
           {!isLoading &&
             data.map((content) => (
-              <Link
+              <CarouselItem
                 key={content.value}
-                href={`/?categoryId=${content.value}`}
+                className="pl-3 basis-auto"
                 onClick={() => onSelect(content.value)}
               >
-                <CarouselItem className="pl-3 basis-auto">
-                  <Badge
-                    variant={value === content.value ? "default" : "secondary"}
-                    className="px-3 py-1 text-xs whitespace-nowrap rounded-lg cursor-pointer sm:text-sm"
-                  >
-                    {content.label}
-                  </Badge>
-                </CarouselItem>
-              </Link>
+                <Badge
+                  variant={value === content.value ? "default" : "secondary"}
+                  className="px-3 py-1 text-xs whitespace-nowrap rounded-lg cursor-pointer sm:text-sm"
+                >
+                  {content.label}
+                </Badge>
+              </CarouselItem>
             ))}
         </CarouselContent>
         <CarouselPrevious className="left-0 z-20" />
