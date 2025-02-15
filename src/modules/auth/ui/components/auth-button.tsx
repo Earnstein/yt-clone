@@ -1,15 +1,43 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
-import { UserCircleIcon } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  SignedIn,
+  SignedOut,
+  SignInButton,
+  UserButton,
+  useUser,
+} from "@clerk/nextjs";
+import { ClapperboardIcon, HomeIcon, UserCircleIcon } from "lucide-react";
+import { usePathname } from "next/navigation";
 export const AuthButton = () => {
+  const { isLoaded } = useUser();
+  const pathname = usePathname();
   //TODO: Add auth functionality
+
+  if (!isLoaded) return <Skeleton className="size-9 rounded-full" />;
+
   return (
     <>
       <SignedIn>
-        <UserButton />
-        {/*TODO: Add menu items for studio and profile*/}
+        <UserButton>
+          {/*TODO: Add menu user profile*/}
+          <UserButton.MenuItems>
+            <UserButton.Link
+              label={pathname === "/studio" ? "Home" : "Studio"}
+              href={pathname === "/studio" ? "/" : "/studio"}
+              labelIcon={
+                pathname === "/studio" ? (
+                  <HomeIcon className="size-4" />
+                ) : (
+                  <ClapperboardIcon className="size-4" />
+                )
+              }
+            />
+            <UserButton.Action label="manageAccount" />
+          </UserButton.MenuItems>
+        </UserButton>
       </SignedIn>
       <SignedOut>
         <SignInButton mode="modal">
