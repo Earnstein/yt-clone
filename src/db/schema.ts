@@ -1,5 +1,12 @@
 import { relations } from "drizzle-orm";
-import { pgTable, text, timestamp, uniqueIndex } from "drizzle-orm/pg-core";
+import {
+  integer,
+  pgEnum,
+  pgTable,
+  text,
+  timestamp,
+  uniqueIndex,
+} from "drizzle-orm/pg-core";
 
 // TODO: TO remove clerkId and save it under id
 export const users = pgTable("users", {
@@ -25,6 +32,9 @@ export const categories = pgTable(
   (t) => [uniqueIndex("name_idx").on(t.name)]
 );
 
+// Video visibility
+export const visibility = pgEnum("visibility", ["public", "private"]);
+
 export const videos = pgTable("videos", {
   id: text("id").primaryKey(),
   title: text("title").notNull(),
@@ -43,8 +53,11 @@ export const videos = pgTable("videos", {
   muxAssetId: text("mux_asset_id").unique(),
   muxPlaybackId: text("mux_playback_id").unique(),
   muxTrackId: text("mux_track_id").unique(),
-  muxTrackStatus: text("mux_track_status").unique(),
-
+  muxTrackStatus: text("mux_track_status"),
+  visibility: visibility("visibility").notNull().default("private"),
+  thumbnailUrl: text("thumbnail_url"),
+  previewUrl: text("preview_url"),
+  duration: integer("duration").notNull().default(0),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
