@@ -69,8 +69,12 @@ const VideoSectionSuspense = () => {
     }
   );
   const mutation = trpc.videos.uploadVideo.useMutation({
+    onMutate: () => {
+      toast.info("Preparing your video uploader...");
+    },
     onSuccess: () => {
-      toast.info("Drop or select a video to upload");
+      toast.dismiss();
+      toast.success("Proceed to upload video");
     },
     onError: (error) => {
       toast.error(error.message);
@@ -203,6 +207,7 @@ const VideoSectionSuspense = () => {
           </p>
         ) : (
           <InfiniteScroll
+            isManual
             hasNextPage={query.hasNextPage}
             ifFetchingNextPage={query.isFetchingNextPage}
             fetchNextPage={query.fetchNextPage}
