@@ -13,12 +13,15 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { DEFAULT_LIMIT } from "@/lib/constants";
+import { formatDate, snakeCaseToTitleCase } from "@/lib/utils";
+import { VideoThumbnail } from "@/modules/videos/ui/components/video-thumbnail";
 import { trpc } from "@/trpc/client";
-import { Loader2Icon, UploadIcon } from "lucide-react";
+import { Globe2Icon, Loader2Icon, LockIcon, UploadIcon } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { toast } from "sonner";
+import StudioBadgeStatus from "../components/studio-badge-status";
 
 const VideoSectionSkeleton = () => {
   const headers = [
@@ -85,6 +88,16 @@ const VideoSectionSuspense = () => {
   const isUploading = (videoId: string): boolean => {
     return mutation.isPending && mutation.variables?.videoId === videoId;
   };
+
+  const handleUploadSuccess = () => {
+    mutation.reset();
+    utils.studio.getAllVideos.invalidate();
+
+    // invalidate the query after 4 seconds after webhook is received
+    setTimeout(() => {
+      utils.studio.getAllVideos.invalidate();
+    }, 4000);
+  };
   return (
     <>
       <ResponsiveModal
@@ -93,15 +106,13 @@ const VideoSectionSuspense = () => {
         description="Upload a video to your channel"
         onOpenChange={() => {
           mutation.reset();
+          utils.studio.getAllVideos.invalidate();
         }}
       >
         {mutation.data?.url ? (
           <StudioUploader
             endpoint={mutation.data.url}
-            onSuccess={() => {
-              mutation.reset();
-              utils.studio.getAllVideos.invalidate();
-            }}
+            onSuccess={handleUploadSuccess}
           />
         ) : (
           <Loader2Icon className="animate-spin size-4" />
@@ -112,10 +123,10 @@ const VideoSectionSuspense = () => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="pl-6 w-[300px]">Video</TableHead>
+                <TableHead className="pl-6 w-[500px]">Video</TableHead>
                 <TableHead>Visibility</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead>Date</TableHead>
+                <TableHead className="text-center">Date</TableHead>
                 <TableHead className="text-right">Views</TableHead>
                 <TableHead className="text-right">Comments</TableHead>
                 <TableHead className="text-right">Likes</TableHead>
@@ -126,57 +137,62 @@ const VideoSectionSuspense = () => {
               {videos.pages.flatMap((page) =>
                 page.items.map((video) => (
                   <TableRow key={video.id} className="hover:bg-muted/50">
-                    <TableCell className="p-0">
-                      <Link
-                        href={`/studio/videos/${video.id}`}
-                        className="block px-6 py-4"
-                      >
-                        {video.title}
+                    <TableCell>
+                      <Link href={`/studio/videos/${video.id}`}>
+                        <div className="flex items-center gap-4">
+                          <div className="relative size-36 aspect-video shrink-0 place-content-center">
+                            <VideoThumbnail
+                              thumbnailUrl={video.thumbnailUrl}
+                              previewUrl={video.previewUrl}
+                              title={video.title}
+                              duration={video.duration}
+                            />
+                          </div>
+
+                          <div className="flex flex-col gap-1 overflow-hidden">
+                            <span className="text-sm line-clamp-1">
+                              {video.title}
+                            </span>
+                            <span className="text-xs text-muted-foreground">
+                              {video.description || "No description"}
+                            </span>
+                          </div>
+                        </div>
                       </Link>
                     </TableCell>
                     <TableCell>
-                      <Link
-                        href={`/studio/videos/${video.id}`}
-                        className="block py-4"
-                      >
-                        visibility
-                      </Link>
+                      <div className="inline-flex items-center gap-2">
+                        {video.visibility === "public" ? (
+                          <Globe2Icon className="size-4" />
+                        ) : (
+                          <LockIcon className="size-4" />
+                        )}
+                        {snakeCaseToTitleCase(video.visibility)}
+                      </div>
                     </TableCell>
                     <TableCell>
-                      <Link
-                        href={`/studio/videos/${video.id}`}
-                        className="block py-4"
-                      >
-                        status
-                      </Link>
+                      {video.muxStatus ? (
+                        <StudioBadgeStatus
+                          status={snakeCaseToTitleCase(video.muxStatus)}
+                        />
+                      ) : (
+                        "_ _"
+                      )}
                     </TableCell>
-                    <TableCell>
-                      <Link
-                        href={`/studio/videos/${video.id}`}
-                        className="block py-4"
-                      >
-                        date
-                      </Link>
+                    <TableCell className="truncate">
+                      {formatDate(
+                        video.createdAt,
+                        {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                        },
+                        " "
+                      )}
                     </TableCell>
-                    <TableCell className="text-right">
-                      <Link
-                        href={`/studio/videos/${video.id}`}
-                        className="block py-4"
-                      >
-                        views
-                      </Link>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Link
-                        href={`/studio/videos/${video.id}`}
-                        className="block py-4"
-                      >
-                        comments
-                      </Link>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Link href={`/studio/videos/${video.id}`}>likes</Link>
-                    </TableCell>
+                    <TableCell className="text-right">views</TableCell>
+                    <TableCell className="text-right">comments</TableCell>
+                    <TableCell className="text-right">likes</TableCell>
                     <TableCell className="pr-6 text-right">
                       <Button
                         variant="outline"
@@ -207,7 +223,6 @@ const VideoSectionSuspense = () => {
           </p>
         ) : (
           <InfiniteScroll
-            isManual
             hasNextPage={query.hasNextPage}
             ifFetchingNextPage={query.isFetchingNextPage}
             fetchNextPage={query.fetchNextPage}
