@@ -1,6 +1,6 @@
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { AuthButton } from "@/modules/auth/ui/components/auth-button";
-import { Youtube } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { StudioCreateModal } from "../studio-create-modal";
 export const StudioNavbar = () => {
@@ -12,7 +12,13 @@ export const StudioNavbar = () => {
           <SidebarTrigger />
           <Link href="/studio">
             <div className="flex gap-1 items-center p-4">
-              <Youtube className="text-rose-500 size-8" />
+              <Image
+                src="/yt.svg"
+                alt="etube"
+                width={24}
+                height={24}
+                className="size-8"
+              />{" "}
               <p className="text-xl font-semibold tracking-tight">Studio</p>
             </div>
           </Link>

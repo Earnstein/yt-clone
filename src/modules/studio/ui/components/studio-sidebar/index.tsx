@@ -17,7 +17,7 @@ import { StudioSidebarHeader } from "./studio-sidebar-header";
 export const StudioSidebar = () => {
   const pathname = usePathname();
   return (
-    <Sidebar className="z-40 pt-16 border-r" collapsible="icon">
+    <Sidebar className="z-40 pt-16 border-r" collapsible="icon" inert>
       <SidebarHeader className="flex items-center justify-center pb-4">
         <StudioSidebarHeader />
       </SidebarHeader>
