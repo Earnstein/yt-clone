@@ -37,6 +37,14 @@ export const videos = pgTable("videos", {
   categoryId: text("category_id").references(() => categories.id, {
     onDelete: "set null",
   }),
+
+  muxStatus: text("mux_status"),
+  muxUploadId: text("mux_upload_id").unique(),
+  muxAssetId: text("mux_asset_id").unique(),
+  muxPlaybackId: text("mux_playback_id").unique(),
+  muxTrackId: text("mux_track_id").unique(),
+  muxTrackStatus: text("mux_track_status").unique(),
+
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
