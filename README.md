@@ -1,6 +1,6 @@
 # YouTube Clone
 
-This is a YouTube clone project built with [Next.js](https://nextjs.org), [Clerk](https://clerk.com/) for authentication, [Drizzle ORM](https://orm.drizzle.team/) for database management, [Upstash](https://upstash.com/) for rate limiting and Redis, [Tailwind CSS](https://tailwindcss.com/) for styling, [tRPC](https://trpc.io/) for building typesafe APIs, and [React Query](https://tanstack.com/query) for data fetching and caching.
+This is a YouTube clone project built with [Next.js](https://nextjs.org), [Clerk](https://clerk.com/) for authentication, [Drizzle ORM](https://orm.drizzle.team/) for database management, [Upstash](https://upstash.com/) for rate limiting and Redis, [Tailwind CSS](https://tailwindcss.com/) for styling, [tRPC](https://trpc.io/) for building typesafe APIs, [Mux](https://mux.com/) for video processing and [React Query](https://tanstack.com/query) for data fetching and caching.
 
 ## Prerequisites
 
@@ -13,6 +13,10 @@ Before running the project, make sure you have the following:
   - [Upstash](https://upstash.com/) for Redis and rate limiting
   - [Vercel](https://vercel.com/) for deployment (optional)
   - [ngrok](https://ngrok.com/) for tunneling in local development
+  - [Mux](https://mux.com/) for video processing
+  - [Drizzle](https://orm.drizzle.team/) for database management
+  - [tRPC](https://trpc.io/) for building typesafe APIs
+  - [React Query](https://tanstack.com/query) for data fetching and caching
 
 ## Getting Started
 
