@@ -2,7 +2,7 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { AuthButton } from "@/modules/auth/ui/components/auth-button";
 import { Youtube } from "lucide-react";
 import Link from "next/link";
-import { StudioUploadModal } from "../studio-upload-modal";
+import { StudioCreateModal } from "../studio-create-modal";
 export const StudioNavbar = () => {
   return (
     <nav className="flex fixed top-0 right-0 left-0 z-50 items-center px-2 pr-5 h-16 bg-white shadow-md border-b">
@@ -20,7 +20,7 @@ export const StudioNavbar = () => {
 
         {/*Auth Button*/}
         <div className="flex flex-shrink-0 gap-4 items-center">
-          <StudioUploadModal />
+          <StudioCreateModal />
           <AuthButton />
         </div>
       </div>
