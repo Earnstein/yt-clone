@@ -26,7 +26,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 const createVideoSchema = z.object({
-  title: z.string().min(1, { message: "Title is required" }).max(16),
+  title: z.string().min(1, { message: "Title is required" }).max(32),
   description: z
     .string()
     .min(1, { message: "Description is required" })
