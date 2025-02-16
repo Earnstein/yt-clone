@@ -1,8 +1,9 @@
 "use client";
 import { ResponsiveModal } from "@/components/responsive-modal";
+import { StudioUploader } from "@/components/studio-uploader";
 import { Button } from "@/components/ui/button";
 import { trpc } from "@/trpc/client";
-import { PlusIcon } from "lucide-react";
+import { Loader2Icon, PlusIcon } from "lucide-react";
 import { toast } from "sonner";
 
 export const StudioUploadModal = () => {
@@ -17,17 +18,22 @@ export const StudioUploadModal = () => {
       toast.error(error.message);
     },
   });
+
   return (
     <>
       <ResponsiveModal
-        open={!!mutation.data}
+        open={!!mutation.data?.url}
         title="Upload Video"
         description="Upload a video to your channel"
         onOpenChange={() => {
           mutation.reset();
         }}
       >
-        <div>...</div>
+        {mutation.data?.url ? (
+          <StudioUploader endpoint={mutation.data.url} onSuccess={() => {}} />
+        ) : (
+          <Loader2Icon className="animate-spin size-4" />
+        )}
       </ResponsiveModal>
       <Button
         variant="secondary"
