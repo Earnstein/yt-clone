@@ -161,6 +161,7 @@ export const StudioCreateModal = () => {
             <Button
               type="submit"
               disabled={mutation.isPending}
+              isLoading={mutation.isPending}
               className="w-full"
             >
               {mutation.isPending ? "Creating..." : "Create"}
@@ -168,6 +169,7 @@ export const StudioCreateModal = () => {
           </form>
         </Form>
       </ResponsiveModal>
+
       <Button
         variant="secondary"
         onClick={() => setOpen(true)}
