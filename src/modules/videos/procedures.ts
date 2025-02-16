@@ -1,24 +1,20 @@
-import { db } from "@/db";
-import { videos } from "@/db/schema";
-import { VIDEO_ID_PREFIX } from "@/lib/constants";
-import { generateUniqueId } from "@/lib/utils";
+import { mux } from "@/lib/mux";
 import { createTRPCRouter, protectedProcedure } from "@/trpc/init";
-
 export const videosRouter = createTRPCRouter({
   createVideo: protectedProcedure.mutation(async ({ ctx }) => {
+    // TODO: to turn this into a upload procedure
     const { id: userId } = ctx.user;
 
-    const video = await db
-      .insert(videos)
-      .values({
-        id: generateUniqueId(VIDEO_ID_PREFIX),
-        userId: userId,
-        title: "Untitled",
-      })
-      .returning();
+    const upload = await mux.video.uploads.create({
+      new_asset_settings: {
+        passthrough: userId,
+        playback_policy: ["public"],
+      },
+      cors_origin: "*", // TODO: in production, restrict this to the frontend domain
+    });
 
     return {
-      video: video,
+      url: upload.url,
     };
   }),
 });
