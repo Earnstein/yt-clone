@@ -41,6 +41,9 @@ Before running the project, make sure you have the following:
    CLERK_SIGNING_SECRET=your-clerk-signing-secret
    UPSTASH_REDIS_URL=your-upstash-redis-url
    UPSTASH_REDIS_TOKEN=your-upstash-redis-token
+   MUX_TOKEN_ID=your-mux-token-id
+   MUX_TOKEN_SECRET=your-mux-token-secret
+   MUX_WEBHOOK_SECRET=your-mux-webhook-secret
    ```
 
    Replace the placeholders with your actual values.
@@ -83,6 +86,7 @@ Before running the project, make sure you have the following:
 - Responsive design with Tailwind CSS
 - Typesafe API with tRPC
 - Efficient data fetching and caching with React Query
+- Video upload and processing with Mux
 
 ## Deployment
 
