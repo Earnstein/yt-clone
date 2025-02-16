@@ -9,7 +9,7 @@ import {
   VideoAssetTrackReadyWebhookEvent,
   VideoAssetUpdatedWebhookEvent,
 } from "@mux/mux-node/resources/webhooks";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { headers } from "next/headers";
 
 const MUX_WEBHOOK_SECRET = process.env.MUX_WEBHOOK_SECRET;
@@ -58,22 +58,35 @@ export const POST = async (request: Request) => {
           { status: 400 }
         );
       }
-
       await db
         .update(videos)
         .set({
+          muxPlaybackId: data.playback_ids[0].id,
           muxAssetId: data.id,
           muxStatus: data.status,
         })
-        .where(eq(videos.muxUploadId, data.upload_id));
+        .where(
+          and(
+            eq(videos.muxUploadId, data.upload_id),
+            eq(videos.id, data.passthrough)
+          )
+        );
 
       break;
     }
     case "video.asset.ready": {
       await db
         .update(videos)
-        .set({ muxStatus: data.status })
-        .where(eq(videos.muxAssetId, data.upload_id));
+        .set({
+          muxStatus: data.status,
+          muxPlaybackId: data.playback_ids[0].id,
+        })
+        .where(
+          and(
+            eq(videos.muxAssetId, data.id),
+            eq(videos.userId, data.passthrough)
+          )
+        );
       break;
     }
   }
