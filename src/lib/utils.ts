@@ -21,3 +21,55 @@ export function generateUniqueId(prefix: string): string {
   const id = prefix + hashString.substring(0, requiredLength - prefix.length);
   return id;
 }
+
+export function formatDuration(duration: number): string {
+  const hours = Math.floor(duration / 3600000);
+  const minutes = Math.floor((duration % 3600000) / 60000);
+  const seconds = Math.floor((duration % 60000) / 1000);
+  return `${hours.toString().padStart(2, "0")}:${minutes
+    .toString()
+    .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+}
+
+export const snakeCaseToTitleCase = (str?: string | null): string => {
+  if (!str) return "_ _";
+  return str
+    .split("_")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+};
+
+export function formatDate(
+  date: Date | string | number | undefined | null,
+  opts: Intl.DateTimeFormatOptions = {},
+  separator?: string // Optional separator parameter
+): string {
+  // Handle undefined or null date
+  if (!date) {
+    return ""; // Return empty string or an alternative default message
+  }
+
+  const newDate = new Date(date);
+
+  // If the separator is provided, format the date with custom separators
+  if (separator) {
+    const year = new Intl.DateTimeFormat("en-US", {
+      year: opts.year ?? "numeric",
+    }).format(newDate);
+    const month = new Intl.DateTimeFormat("en-US", {
+      month: opts.month ?? "2-digit",
+    }).format(newDate);
+    const day = new Intl.DateTimeFormat("en-US", {
+      day: opts.day ?? "2-digit",
+    }).format(newDate);
+    return `${day}${separator}${month}${separator}${year}`;
+  }
+
+  // Default formatting if no separator is provided
+  return new Intl.DateTimeFormat("en-US", {
+    month: opts.month ?? "long",
+    day: opts.day ?? "numeric",
+    year: opts.year ?? "numeric",
+    ...opts,
+  }).format(newDate);
+}
