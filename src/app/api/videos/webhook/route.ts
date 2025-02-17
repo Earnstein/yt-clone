@@ -89,7 +89,7 @@ export const POST = async (request: Request) => {
         .update(videos)
         .set({
           thumbnailUrl: thumbNailUrl,
-          muxStatus: data.status,
+          muxStatus: eventData.status,
           muxPlaybackId: playbackId,
           previewUrl: previewUrl,
           duration: duration,
