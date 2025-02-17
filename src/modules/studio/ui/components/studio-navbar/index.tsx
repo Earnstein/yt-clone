@@ -2,6 +2,8 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { AuthButton } from "@/modules/auth/ui/components/auth-button";
 import Image from "next/image";
 import Link from "next/link";
+import { Suspense } from "react";
+import { ErrorBoundary } from "react-error-boundary";
 import { StudioCreateModal } from "../studio-create-modal";
 export const StudioNavbar = () => {
   return (
@@ -26,7 +28,11 @@ export const StudioNavbar = () => {
 
         {/*Auth Button*/}
         <div className="flex flex-shrink-0 gap-4 items-center">
-          <StudioCreateModal />
+          <Suspense fallback={<div>Loading...</div>}>
+            <ErrorBoundary fallback={<div>Error</div>}>
+              <StudioCreateModal />
+            </ErrorBoundary>
+          </Suspense>
           <AuthButton />
         </div>
       </div>

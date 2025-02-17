@@ -17,7 +17,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Skeleton } from "@/components/ui/skeleton";
 import { trpc } from "@/trpc/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PlusIcon } from "lucide-react";
@@ -60,20 +59,10 @@ export const StudioCreateModal = () => {
     },
   });
 
-  const categories = trpc.categories.getAll.useQuery();
+  const [categories] = trpc.categories.getAll.useSuspenseQuery();
 
   const renderCategoryList = () => {
-    if (categories.isLoading) {
-      return (
-        <div className="space-y-2">
-          {[...Array(4)].map((_, i) => (
-            <Skeleton key={i} className="w-full h-8 rounded-none" />
-          ))}
-        </div>
-      );
-    }
-
-    if (!categories?.data?.length) {
+    if (categories.length === 0) {
       return (
         <div className="space-y-1 border-b border-neutral-200">
           <SelectItem value="none" disabled>
@@ -83,7 +72,7 @@ export const StudioCreateModal = () => {
       );
     }
 
-    return categories.data.map((category) => (
+    return categories.map((category) => (
       <SelectItem key={category.id} value={category.id}>
         <span className="text-body-2">{category.name}</span>
       </SelectItem>
