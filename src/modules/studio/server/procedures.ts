@@ -2,9 +2,23 @@ import { db } from "@/db";
 import { videos } from "@/db/schema";
 import { DEFAULT_LIMIT } from "@/lib/constants";
 import { createTRPCRouter, protectedProcedure } from "@/trpc/init";
+import { TRPCError } from "@trpc/server";
 import { and, desc, eq, lt, or } from "drizzle-orm";
 import { z } from "zod";
 export const studioRouter = createTRPCRouter({
+  getVideoById: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ input }) => {
+      const { id } = input;
+
+      const [video] = await db.select().from(videos).where(eq(videos.id, id));
+
+      if (!video) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Video not found" });
+      }
+
+      return video;
+    }),
   getAllVideos: protectedProcedure
     .input(
       z.object({
