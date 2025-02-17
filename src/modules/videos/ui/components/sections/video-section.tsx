@@ -157,7 +157,6 @@ const VideoSectionSuspense: React.FC<VideoSectionProps> = ({ videoId }) => {
               type="submit"
               disabled={updateVideoMutation.isPending}
               isLoading={updateVideoMutation.isPending}
-              variant="outline"
             >
               {updateVideoMutation.isPending ? "Saving..." : "Save"}
             </Button>
