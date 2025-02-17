@@ -7,8 +7,13 @@ import {
   timestamp,
   uniqueIndex,
 } from "drizzle-orm/pg-core";
+import {
+  createInsertSchema,
+  createSelectSchema,
+  createUpdateSchema,
+} from "drizzle-zod";
 
-// TODO: TO remove clerkId and save it under id
+// TODO: TO remove clerkId and save it under id --- DONE
 export const users = pgTable("users", {
   id: text("id").primaryKey(),
   email: text("email").notNull().unique(),
@@ -61,6 +66,11 @@ export const videos = pgTable("videos", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
+
+// This helps generate zod schemas for the video table
+export const videoInsertSchema = createInsertSchema(videos);
+export const videoSelectSchema = createSelectSchema(videos);
+export const videoUpdateSchema = createUpdateSchema(videos);
 
 /*
 Note: This is for application-level use only and doesn't affect database-level relations.
