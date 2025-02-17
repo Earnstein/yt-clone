@@ -18,7 +18,6 @@ export const VideoThumbnail: React.FC<VideoThumbnailProps> = ({
       {/*Thumbnail wrapper*/}
       <div className="relative w-full overflow-hidden rounded-xl aspect-video">
         <Image
-          unoptimized={!!thumbnailUrl}
           loader={({ src }) => src || "/placeholder.svg"}
           src={thumbnailUrl || "/placeholder.svg"}
           alt={title}
@@ -28,14 +27,13 @@ export const VideoThumbnail: React.FC<VideoThumbnailProps> = ({
           priority
         />
         <Image
-          unoptimized={!!previewUrl}
           loader={({ src }) => src || thumbnailUrl || "/placeholder.svg"}
           src={previewUrl || thumbnailUrl || "/placeholder.svg"}
           alt={title}
           fill
           sizes="33vw"
           className="object-cover size-full opacity-0 group-hover:opacity-100"
-          priority
+          loading="lazy"
         />
       </div>
 
