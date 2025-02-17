@@ -17,13 +17,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
 import { trpc } from "@/trpc/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PlusIcon } from "lucide-react";
+import { useParams, usePathname } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
+import { StudioUploadVideoModal } from "./studio-upload-video";
 const createVideoSchema = z.object({
   title: z.string().min(1, { message: "Title is required" }).max(32),
   description: z
@@ -36,6 +39,8 @@ const createVideoSchema = z.object({
 type TCreateVideo = z.infer<typeof createVideoSchema>;
 
 export const StudioCreateModal = () => {
+  const pathname = usePathname();
+  const { videoId } = useParams<{ videoId: string }>();
   const [open, setOpen] = useState(false);
 
   const form = useForm<TCreateVideo>({
@@ -59,10 +64,31 @@ export const StudioCreateModal = () => {
     },
   });
 
-  const [categories] = trpc.categories.getAll.useSuspenseQuery();
+  const categories = trpc.categories.getAll.useQuery();
 
   const renderCategoryList = () => {
-    if (categories.length === 0) {
+    if (categories.isLoading) {
+      return (
+        <div className="space-y-2">
+          {[...Array(4)].map((_, i) => (
+            <Skeleton key={i} className="w-full h-8 rounded-none" />
+          ))}
+        </div>
+      );
+    }
+
+    if (categories.isError) {
+      return (
+        <div className="space-y-1 border-b border-neutral-200 text-xs text-muted-foreground">
+          <p className="text-body-2">Error loading categories</p>
+          <p className="text-body-2 text-destructive">
+            {categories.error.data?.httpStatus}: {categories.error.message}
+          </p>
+        </div>
+      );
+    }
+
+    if (!categories?.data?.length) {
       return (
         <div className="space-y-1 border-b border-neutral-200">
           <SelectItem value="none" disabled>
@@ -72,7 +98,7 @@ export const StudioCreateModal = () => {
       );
     }
 
-    return categories.map((category) => (
+    return categories.data.map((category) => (
       <SelectItem key={category.id} value={category.id}>
         <span className="text-body-2">{category.name}</span>
       </SelectItem>
@@ -82,6 +108,7 @@ export const StudioCreateModal = () => {
   const handleSubmit = (data: TCreateVideo) => {
     mutation.mutate(data);
   };
+
   return (
     <>
       <ResponsiveModal
@@ -159,15 +186,21 @@ export const StudioCreateModal = () => {
         </Form>
       </ResponsiveModal>
 
-      <Button
-        variant="secondary"
-        onClick={() => setOpen(true)}
-        disabled={mutation.isPending}
-        isLoading={mutation.isPending}
-      >
-        {!mutation.isPending && <PlusIcon className="size-4" />}
-        {mutation.isPending ? "Creating..." : "Create"}
-      </Button>
+      {pathname === "/studio" ? (
+        <Button
+          variant="secondary"
+          onClick={() => setOpen(true)}
+          disabled={mutation.isPending}
+          isLoading={mutation.isPending}
+        >
+          {!mutation.isPending && <PlusIcon className="size-4" />}
+          {mutation.isPending ? "Creating..." : "Create"}
+        </Button>
+      ) : (
+        <>
+          <StudioUploadVideoModal videoId={videoId} />
+        </>
+      )}
     </>
   );
 };
