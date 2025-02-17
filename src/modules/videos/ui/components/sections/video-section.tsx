@@ -37,6 +37,7 @@ import {
   CopyIcon,
   EllipsisVertical,
   Globe2Icon,
+  Loader2,
   LockIcon,
   TrashIcon,
 } from "lucide-react";
@@ -79,8 +80,8 @@ const VideoSectionSuspense: React.FC<VideoSectionProps> = ({ videoId }) => {
 
   const deleteVideoMutation = trpc.videos.deleteVideo.useMutation({
     onSuccess: (data) => {
-      toast.success(data.message);
       utils.studio.getAllVideos.invalidate();
+      toast.success(data.message);
       router.push("/studio");
     },
     onError: (error) => {
@@ -169,9 +170,14 @@ const VideoSectionSuspense: React.FC<VideoSectionProps> = ({ videoId }) => {
               <DropdownMenuContent align="end">
                 <DropdownMenuItem
                   onClick={() => deleteVideoMutation.mutate({ id: videoId })}
+                  disabled={deleteVideoMutation.isPending}
                 >
-                  <TrashIcon className="size-4 mr-2" />
-                  Delete
+                  {deleteVideoMutation.isPending ? (
+                    <Loader2 className="size-4 mr-2 motion-preset-spin motion-duration-1500" />
+                  ) : (
+                    <TrashIcon className="size-4 mr-2" />
+                  )}
+                  {deleteVideoMutation.isPending ? "Deleting..." : "Delete"}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

@@ -122,7 +122,7 @@ const VideoSectionSuspense = () => {
                       {video.visibility === "public" ? (
                         <Globe2Icon className="size-4" />
                       ) : (
-                        <LockIcon className="size-4" />
+                        <LockIcon className="size-4 hover:motion-preset-seesaw" />
                       )}
                       {snakeCaseToTitleCase(video.visibility)}
                     </div>
