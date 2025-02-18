@@ -1,6 +1,7 @@
 "use client";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -52,6 +53,72 @@ import { VideoPlayer } from "../video-player";
 interface VideoSectionProps {
   videoId: string;
 }
+const VideoSkeleton = () => {
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-6">
+        <div className="space-y-2">
+          <Skeleton className="h-8 w-[150px]" />
+          <Skeleton className="h-4 w-[200px]" />
+        </div>
+        <div className="flex items-center gap-2">
+          <Skeleton className="h-10 w-[70px]" />
+          <Button variant="ghost" size="icon" disabled>
+            <EllipsisVertical className="text-muted-foreground" />
+          </Button>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+        <div className="space-y-8 col-span-1 lg:col-span-3">
+          <div className="space-y-2">
+            <Skeleton className="h-5 w-[60px]" />
+            <Skeleton className="h-10 w-full" />
+          </div>
+
+          <div className="space-y-2">
+            <Skeleton className="h-5 w-[100px]" />
+            <Skeleton className="h-[250px] w-full" />
+          </div>
+
+          <div className="space-y-2">
+            <Skeleton className="h-5 w-[80px]" />
+            <Skeleton className="h-10 w-full" />
+          </div>
+        </div>
+
+        <div className="space-y-8 col-span-1 lg:col-span-2">
+          <Card className="bg-[#F9F9F9]">
+            <AspectRatio ratio={16 / 9}>
+              <Skeleton className="h-full w-full rounded-none" />
+            </AspectRatio>
+            <div className="p-4 space-y-6">
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-[200px]" />
+                <Skeleton className="h-4 w-[150px]" />
+              </div>
+
+              <div className="space-y-1">
+                <Skeleton className="h-4 w-[100px]" />
+                <Skeleton className="h-6 w-[120px]" />
+              </div>
+
+              <div className="space-y-1">
+                <Skeleton className="h-4 w-[100px]" />
+                <Skeleton className="h-6 w-[120px]" />
+              </div>
+            </div>
+          </Card>
+
+          <div className="space-y-2">
+            <Skeleton className="h-5 w-[120px]" />
+            <Skeleton className="h-10 w-full" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 const VideoSectionSuspense: React.FC<VideoSectionProps> = ({ videoId }) => {
   const router = useRouter();
   const utils = trpc.useUtils();
@@ -366,7 +433,7 @@ const VideoSectionSuspense: React.FC<VideoSectionProps> = ({ videoId }) => {
 
 export const VideoSection: React.FC<VideoSectionProps> = ({ videoId }) => {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<VideoSkeleton />}>
       <ErrorBoundary fallback={<div>Error</div>}>
         <VideoSectionSuspense videoId={videoId} />
       </ErrorBoundary>
