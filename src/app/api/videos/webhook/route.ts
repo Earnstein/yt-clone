@@ -11,6 +11,7 @@ import {
 } from "@mux/mux-node/resources/webhooks";
 import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
+import { UTApi } from "uploadthing/server";
 
 const MUX_WEBHOOK_SECRET = process.env.MUX_WEBHOOK_SECRET;
 
@@ -80,17 +81,36 @@ export const POST = async (request: Request) => {
         );
       }
 
-      const thumbNailUrl = `https://image.mux.com/${playbackId}/thumbnail.jpg`;
-      const previewUrl = `https://image.mux.com/${playbackId}/animated.gif`;
+      const generatedThumbnailUrl = `https://image.mux.com/${playbackId}/thumbnail.jpg`;
+      const generatedPreviewUrl = `https://image.mux.com/${playbackId}/animated.gif`;
+
       const duration =
         eventData?.duration && Math.round(eventData.duration * 1000);
+      // Upload thumbnail to UploadThing
+      const utApi = new UTApi();
+      const [thumbnailData, previewData] = await utApi.uploadFilesFromUrl([
+        generatedThumbnailUrl,
+        generatedPreviewUrl,
+      ]);
+
+      if (thumbnailData.error || previewData.error) {
+        return Response.json(
+          { message: "Failed to upload thumbnail or preview" },
+          { status: 400 }
+        );
+      }
+
+      const { key: thumbnailKey, ufsUrl: thumbnailUrl } = thumbnailData.data!;
+      const { key: previewKey, ufsUrl: previewUrl } = previewData.data!;
 
       await db
         .update(videos)
         .set({
-          thumbnailUrl: thumbNailUrl,
+          thumbnailKey: thumbnailKey,
+          thumbnailUrl: thumbnailUrl,
           muxStatus: eventData.status,
           muxPlaybackId: playbackId,
+          previewKey: previewKey,
           previewUrl: previewUrl,
           duration: duration,
         })
