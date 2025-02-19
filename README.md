@@ -17,6 +17,7 @@ Before running the project, make sure you have the following:
   - [Drizzle](https://orm.drizzle.team/) for database management
   - [tRPC](https://trpc.io/) for building typesafe APIs
   - [React Query](https://tanstack.com/query) for data fetching and caching
+  - [UploadThing](https://uploadthing.com/) for file uploads
 
 ## Getting Started
 
@@ -48,6 +49,7 @@ Before running the project, make sure you have the following:
    MUX_TOKEN_ID=your-mux-token-id
    MUX_TOKEN_SECRET=your-mux-token-secret
    MUX_WEBHOOK_SECRET=your-mux-webhook-secret
+   UPLOADTHING_TOKEN=your-uploadthing-token
    ```
 
    Replace the placeholders with your actual values.
@@ -91,6 +93,7 @@ Before running the project, make sure you have the following:
 - Typesafe API with tRPC
 - Efficient data fetching and caching with React Query
 - Video upload and processing with Mux
+- File uploads with UploadThing
 
 ## Deployment
 
