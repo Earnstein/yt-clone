@@ -6,6 +6,7 @@ import { generateUniqueId } from "@/lib/utils";
 import { createTRPCRouter, protectedProcedure } from "@/trpc/init";
 import { TRPCError } from "@trpc/server";
 import { and, eq } from "drizzle-orm";
+import { UTApi } from "uploadthing/server";
 import { z } from "zod";
 export const videosRouter = createTRPCRouter({
   restoreThumbnail: protectedProcedure
@@ -18,22 +19,58 @@ export const videosRouter = createTRPCRouter({
         .from(videos)
         .where(and(eq(videos.id, input.videoId), eq(videos.userId, userId)));
 
+      // Check if video exists
       if (!video) {
         throw new TRPCError({ code: "NOT_FOUND", message: "Video not found" });
       }
 
+      // Check if video has a thumbnail
+      if (video.thumbnailKey) {
+        const utApi = new UTApi();
+
+        // Delete the thumbnail from UploadThing
+        await utApi.deleteFiles([video.thumbnailKey]);
+
+        // Update the video to remove the thumbnail
+        await db
+          .update(videos)
+          .set({
+            thumbnailKey: null,
+            thumbnailUrl: null,
+          })
+          .where(eq(videos.id, input.videoId));
+      }
+
+      // Check if video has a mux playback id
       if (!video.muxPlaybackId) {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: "Video is not processed yet",
+          message:
+            "This video has no generated thumbnail. Please upload a video first.",
         });
       }
 
-      const thumbNailUrl = `https://image.mux.com/${video.muxPlaybackId}/thumbnail.jpg`;
+      // Generate the thumbnail url
+      const generatedThumbnailUrl = `https://image.mux.com/${video.muxPlaybackId}/thumbnail.jpg`;
 
+      const utApi = new UTApi();
+      const { data: thumbnailData, error: thumbnailError } =
+        await utApi.uploadFilesFromUrl(generatedThumbnailUrl);
+
+      if (thumbnailError) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to generate thumbnail",
+        });
+      }
+
+      // Update the video to add the thumbnail
       const [updatedVideo] = await db
         .update(videos)
-        .set({ thumbnailUrl: thumbNailUrl })
+        .set({
+          thumbnailKey: thumbnailData.key,
+          thumbnailUrl: thumbnailData.ufsUrl,
+        })
         .where(and(eq(videos.id, input.videoId), eq(videos.userId, userId)));
 
       return updatedVideo;
@@ -139,10 +176,20 @@ export const videosRouter = createTRPCRouter({
     .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
       const { id: userId } = ctx.user;
+      const utApi = new UTApi();
 
-      await db
+      const [video] = await db
         .delete(videos)
-        .where(and(eq(videos.id, input.id), eq(videos.userId, userId)));
+        .where(and(eq(videos.id, input.id), eq(videos.userId, userId)))
+        .returning();
+
+      // Delete associated files from UploadThing
+      const keysToDelete = [video.thumbnailKey, video.previewKey].filter(
+        (key): key is string => Boolean(key)
+      );
+      if (keysToDelete.length > 0) {
+        await utApi.deleteFiles(keysToDelete);
+      }
 
       return {
         message: "Video deleted successfully",
