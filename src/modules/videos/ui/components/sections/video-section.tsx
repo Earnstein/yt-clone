@@ -165,6 +165,7 @@ const VideoSectionSuspense: React.FC<VideoSectionProps> = ({ videoId }) => {
       toast.success("Thumbnail updated successfully");
     },
     onError: (error) => {
+      toast.dismiss();
       toast.error(error.message);
     },
   });
@@ -175,8 +176,8 @@ const VideoSectionSuspense: React.FC<VideoSectionProps> = ({ videoId }) => {
       toast.loading(`Deleting ${video.title}....`);
     },
     onSuccess: (data) => {
-      toast.dismiss();
       utils.studio.getAllVideos.invalidate();
+      toast.dismiss();
       toast.success(data.message);
       router.push("/studio");
     },
@@ -184,7 +185,6 @@ const VideoSectionSuspense: React.FC<VideoSectionProps> = ({ videoId }) => {
       toast.error(error.message);
     },
   });
-
   // Form
   const form = useForm<TUpdateVideo>({
     resolver: zodResolver(videoUpdateSchema),
@@ -335,6 +335,7 @@ const VideoSectionSuspense: React.FC<VideoSectionProps> = ({ videoId }) => {
                     <FormControl>
                       <div className="border border-dashed p-0.5 border-neutral-400 relative h-[84px] w-[153px] group">
                         <Image
+                          loader={({ src }) => src}
                           src={video.thumbnailUrl || THUMBNAIL_PLACEHOLDER_URL}
                           alt="Thumbnail"
                           fill
@@ -355,17 +356,25 @@ const VideoSectionSuspense: React.FC<VideoSectionProps> = ({ videoId }) => {
                             <DropdownMenuItem
                               className="group"
                               onClick={() => setOpen(true)}
+                              disabled={!video.muxPlaybackId}
                             >
                               <ImagePlusIcon className="size-4 mr-1 group-hover:motion-preset-bounce" />
                               Change
                             </DropdownMenuItem>
-                            <DropdownMenuItem className="group">
+                            <DropdownMenuItem
+                              className="group"
+                              disabled={!video.muxPlaybackId}
+                            >
                               <SparklesIcon className="size-4 mr-1 group-hover:motion-preset-seesaw" />
                               AI generated
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               className="group"
-                              disabled={restoreThumbnailMutation.isPending}
+                              disabled={
+                                restoreThumbnailMutation.isPending ||
+                                !video.muxPlaybackId ||
+                                !video.thumbnailKey
+                              }
                               onClick={() =>
                                 restoreThumbnailMutation.mutate({
                                   videoId,
