@@ -3,7 +3,7 @@ import { users, videos } from "@/db/schema";
 import { auth } from "@clerk/nextjs/server";
 import { and, eq } from "drizzle-orm";
 import { createUploadthing, type FileRouter } from "uploadthing/next";
-import { UploadThingError } from "uploadthing/server";
+import { UploadThingError, UTApi } from "uploadthing/server";
 import { z } from "zod";
 
 const f = createUploadthing();
@@ -32,16 +32,48 @@ export const ourFileRouter = {
 
       if (!user) throw new UploadThingError("User not found");
 
+      const [existingVideo] = await db
+        .select({
+          thumbnailKey: videos.thumbnailKey,
+          previewKey: videos.previewKey,
+        })
+        .from(videos)
+        .where(and(eq(videos.id, input.videoId), eq(videos.userId, userId)));
+
+      if (!existingVideo) throw new UploadThingError("Video not found");
+
+      //* Delete existing files from UploadThing
+      const keysToDelete = [
+        existingVideo.thumbnailKey,
+        existingVideo.previewKey,
+      ].filter((key): key is string => Boolean(key));
+      if (keysToDelete.length > 0) {
+        const utApi = new UTApi();
+
+        await utApi.deleteFiles(keysToDelete);
+        await db
+          .update(videos)
+          .set({
+            thumbnailKey: null,
+            thumbnailUrl: null,
+            previewKey: null,
+            previewUrl: null,
+          })
+          .where(eq(videos.id, input.videoId));
+      }
+
       // Whatever is returned here is accessible in onUploadComplete as `metadata`
       return { user, videoId: input.videoId };
     })
     .onUploadComplete(async ({ metadata, file }) => {
-      // This code RUNS ON YOUR SERVER after upload
+      //* This code RUNS ON YOUR SERVER after upload
 
+      // Update the video to add the thumbnail and key
       await db
         .update(videos)
         .set({
           thumbnailUrl: file.ufsUrl,
+          thumbnailKey: file.key,
         })
         .where(
           and(
