@@ -4,6 +4,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { THUMBNAIL_PLACEHOLDER_URL } from "@/lib/constants";
 import MuxPlayer from "@mux/mux-player-react";
 import Image from "next/image";
 
@@ -26,7 +27,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
         <Tooltip>
           <TooltipTrigger asChild>
             <Image
-              src="/placeholder.svg"
+              src={THUMBNAIL_PLACEHOLDER_URL}
               alt="No video found"
               width={100}
               height={100}
@@ -45,7 +46,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
     <MuxPlayer
       playbackId={playbackId}
       thumbnailTime={0}
-      poster={thumbnailUrl || "/placeholder.svg"}
+      poster={thumbnailUrl || THUMBNAIL_PLACEHOLDER_URL}
       autoPlay={autoPlay}
       onPlay={onPlay}
       className="size-full object-contain"

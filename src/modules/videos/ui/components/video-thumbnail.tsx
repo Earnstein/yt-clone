@@ -1,3 +1,4 @@
+import { THUMBNAIL_PLACEHOLDER_URL } from "@/lib/constants";
 import { formatDuration } from "@/lib/utils";
 import Image from "next/image";
 
@@ -18,8 +19,8 @@ export const VideoThumbnail: React.FC<VideoThumbnailProps> = ({
       {/*Thumbnail wrapper*/}
       <div className="relative w-full overflow-hidden rounded-xl aspect-video">
         <Image
-          loader={({ src }) => src || "/placeholder.svg"}
-          src={thumbnailUrl || "/placeholder.svg"}
+          loader={({ src }) => src || THUMBNAIL_PLACEHOLDER_URL}
+          src={thumbnailUrl || THUMBNAIL_PLACEHOLDER_URL}
           alt={title}
           fill
           sizes="33vw"
@@ -27,8 +28,8 @@ export const VideoThumbnail: React.FC<VideoThumbnailProps> = ({
           priority
         />
         <Image
-          loader={({ src }) => src || thumbnailUrl || "/placeholder.svg"}
-          src={previewUrl || thumbnailUrl || "/placeholder.svg"}
+          loader={({ src }) => src || THUMBNAIL_PLACEHOLDER_URL}
+          src={previewUrl || thumbnailUrl || THUMBNAIL_PLACEHOLDER_URL}
           alt={title}
           fill
           sizes="33vw"
