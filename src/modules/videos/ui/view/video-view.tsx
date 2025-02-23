@@ -1,4 +1,4 @@
-import { VideoSection } from "../ui/components/sections/video-section";
+import { VideoSection } from "../sections/video-section";
 
 interface VideoViewProps {
   videoId: string;
