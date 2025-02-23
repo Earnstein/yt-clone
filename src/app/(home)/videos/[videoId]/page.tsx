@@ -1,3 +1,4 @@
+import { VideoView } from "@/modules/videos/ui/view/video-view";
 import { HydrateClient, trpc } from "@/trpc/server";
 import { NextPage } from "next";
 export const dynamic = "force-dynamic";
@@ -11,7 +12,7 @@ const Page: NextPage<PageProps> = async ({ params }) => {
   void trpc.videos.getOne.prefetch({ id: videoId });
   return (
     <HydrateClient>
-      <h1>Video {videoId}</h1>
+      <VideoView videoId={videoId} />
     </HydrateClient>
   );
 };
