@@ -44,7 +44,6 @@ import {
   Loader2,
   LockIcon,
   RotateCcwIcon,
-  SparklesIcon,
   TrashIcon,
 } from "lucide-react";
 import Image from "next/image";
@@ -361,13 +360,7 @@ const VideoSectionSuspense: React.FC<VideoSectionProps> = ({ videoId }) => {
                               <ImagePlusIcon className="size-4 mr-1 group-hover:motion-preset-bounce" />
                               Change
                             </DropdownMenuItem>
-                            <DropdownMenuItem
-                              className="group"
-                              disabled={!video.muxPlaybackId}
-                            >
-                              <SparklesIcon className="size-4 mr-1 group-hover:motion-preset-seesaw" />
-                              AI generated
-                            </DropdownMenuItem>
+
                             <DropdownMenuItem
                               className="group"
                               disabled={
