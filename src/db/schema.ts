@@ -13,7 +13,6 @@ import {
   createUpdateSchema,
 } from "drizzle-zod";
 
-// TODO: TO remove clerkId and save it under id --- DONE
 export const users = pgTable("users", {
   id: text("id").primaryKey(),
   email: text("email").notNull().unique(),
