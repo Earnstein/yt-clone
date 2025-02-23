@@ -197,7 +197,7 @@ const VideoSectionSuspense: React.FC<VideoSectionProps> = ({ videoId }) => {
   // TODO: Change if deployed to services other than vercel
   const url = `${
     process.env.VERCEL_URL || "http://localhost:3000"
-  }/studio/videos/${videoId}`;
+  }/videos/${videoId}`;
 
   const renderCategoryList = () => {
     if (categories.isLoading) {
@@ -438,7 +438,7 @@ const VideoSectionSuspense: React.FC<VideoSectionProps> = ({ videoId }) => {
                       </p>
 
                       <div className="flex items-center gap-x-2">
-                        <Link href={`/studio/videos/${videoId}`}>
+                        <Link href={`/videos/${videoId}`}>
                           <p className="text-xs sm:text-sm line-clamp-1 text-blue-500">
                             {url}
                           </p>
