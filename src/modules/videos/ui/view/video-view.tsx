@@ -4,10 +4,14 @@ interface VideoViewProps {
   videoId: string;
 }
 
-export const VideoView: React.FC<VideoViewProps> = async ({ videoId }) => {
+export const VideoView: React.FC<VideoViewProps> = ({ videoId }) => {
   return (
-    <div className="px-4 pt-2.5 container">
-      <VideoSection videoId={videoId} />
+    <div className="flex flex-col max-w-[1700px] mx-auto pt-2.5 px-4 mb-10">
+      <div className="flex flex-col md:flex-row gap-6">
+        <div className="flex-1 min-w-0">
+          <VideoSection videoId={videoId} />
+        </div>
+      </div>
     </div>
   );
 };
