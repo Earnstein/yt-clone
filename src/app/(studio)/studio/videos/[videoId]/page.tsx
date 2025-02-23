@@ -1,4 +1,4 @@
-import { VideoView } from "@/modules/videos/view/video-view";
+import { VideoView } from "@/modules/studio/ui/views/video-view";
 import { HydrateClient, trpc } from "@/trpc/server";
 import { NextPage } from "next";
 export const dynamic = "force-dynamic";
