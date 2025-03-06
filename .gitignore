@@ -45,3 +45,5 @@ src/scripts/seed-categories.ts
 
 # migrations
 drizzle/
+
+.cursor
