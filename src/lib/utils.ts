@@ -73,3 +73,12 @@ export function formatDate(
     ...opts,
   }).format(newDate);
 }
+
+export function formatNumber(
+  number: number,
+  opts: Intl.NumberFormatOptions = {}
+): string {
+  return new Intl.NumberFormat("en-US", {
+    ...opts,
+  }).format(number);
+}
