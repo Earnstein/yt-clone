@@ -6,12 +6,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
 import {
   EllipsisVerticalIcon,
   ListPlusIcon,
   ShareIcon,
   Trash2Icon,
 } from "lucide-react";
+import { toast } from "sonner";
 
 interface VideoMenuProps {
   videoId: string;
@@ -25,6 +27,21 @@ export const VideoMenus: React.FC<VideoMenuProps> = ({
   variant,
   onRemove,
 }) => {
+  const { copyToClipboard } = useCopyToClipboard({
+    timeout: 2000,
+    onCopy: () => {
+      toast.success("Link copied to clipboard");
+    },
+  });
+
+  const onShare = () => {
+    const url = `${
+      process.env.VERCEL_URL || "http://localhost:3000"
+    }/videos/${videoId}`;
+
+    copyToClipboard(url);
+  };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -33,7 +50,7 @@ export const VideoMenus: React.FC<VideoMenuProps> = ({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
-        <DropdownMenuItem onClick={() => {}}>
+        <DropdownMenuItem onClick={onShare}>
           <ShareIcon className="mr-2 size-4" />
           Share
         </DropdownMenuItem>
