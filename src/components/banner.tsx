@@ -35,6 +35,7 @@ export const Banner = ({
 
     if (!lastShown || now - parseInt(lastShown) > fourDaysInMs) {
       setIsVisible(true);
+      localStorage.setItem("bannerLastShown", now.toString());
     }
 
     const timeout = setTimeout(() => {
@@ -44,9 +45,6 @@ export const Banner = ({
     return () => clearTimeout(timeout);
   }, [useLocalStorage, time]);
 
-  setTimeout(() => {
-    setIsVisible(false);
-  }, 5000);
   if (!isVisible) return null;
 
   return (
