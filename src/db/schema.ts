@@ -3,6 +3,7 @@ import {
   integer,
   pgEnum,
   pgTable,
+  primaryKey,
   text,
   timestamp,
   uniqueIndex,
@@ -68,10 +69,39 @@ export const videos = pgTable("videos", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
+export const videoViews = pgTable(
+  "video_views",
+  {
+    userId: text("user_id")
+      .references(() => users.id, {
+        onDelete: "cascade",
+      })
+      .notNull(),
+    videoId: text("video_id")
+      .references(() => videos.id, {
+        onDelete: "cascade",
+      })
+      .notNull(),
+
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  },
+  (t) => [
+    primaryKey({
+      name: "id",
+      columns: [t.userId, t.videoId],
+    }),
+  ]
+);
+
 // This helps generate zod schemas for the video table
 export const videoInsertSchema = createInsertSchema(videos);
 export const videoSelectSchema = createSelectSchema(videos);
 export const videoUpdateSchema = createUpdateSchema(videos);
+
+export const videoViewInsertSchema = createInsertSchema(videoViews);
+export const videoViewSelectSchema = createSelectSchema(videoViews);
+export const videoViewUpdateSchema = createUpdateSchema(videoViews);
 
 /*
 Note: This is for application-level use only and doesn't affect database-level relations.
@@ -81,7 +111,7 @@ It is not necessary for Drizzle's select and join operations. It's included here
 
 refer to https://orm.drizzle.team/docs/relations for more information
 */
-export const videoRelations = relations(videos, ({ one }) => ({
+export const videoRelations = relations(videos, ({ one, many }) => ({
   user: one(users, {
     fields: [videos.userId],
     references: [users.id],
@@ -90,6 +120,7 @@ export const videoRelations = relations(videos, ({ one }) => ({
     fields: [videos.categoryId],
     references: [categories.id],
   }),
+  views: many(videoViews),
 }));
 
 export const userRelations = relations(users, ({ many }) => ({
@@ -98,4 +129,15 @@ export const userRelations = relations(users, ({ many }) => ({
 
 export const categoryRelations = relations(categories, ({ many }) => ({
   videos: many(videos),
+}));
+
+export const videoViewRelations = relations(videoViews, ({ one }) => ({
+  user: one(users, {
+    fields: [videoViews.userId],
+    references: [users.id],
+  }),
+  video: one(videos, {
+    fields: [videoViews.videoId],
+    references: [videos.id],
+  }),
 }));
