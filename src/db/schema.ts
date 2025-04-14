@@ -98,7 +98,7 @@ export const videoViews = pgTable(
   ]
 );
 
-const reactionTypes = pgEnum("reaction_types", ["like", "dislike"]);
+export const reactionTypes = pgEnum("reaction_types", ["like", "dislike"]);
 
 // Video reactions schema
 export const videoReactions = pgTable(
