@@ -92,7 +92,7 @@ export const videoViews = pgTable(
   },
   (t) => [
     primaryKey({
-      name: "id",
+      name: "video_views_pk",
       columns: [t.userId, t.videoId],
     }),
   ]
@@ -120,7 +120,7 @@ export const videoReactions = pgTable(
   },
   (t) => [
     primaryKey({
-      name: "id",
+      name: "video_reactions_pk",
       columns: [t.userId, t.videoId],
     }),
   ]
@@ -144,7 +144,6 @@ export const videoRelations = relations(videos, ({ one, many }) => ({
     references: [categories.id],
   }),
   views: many(videoViews),
-  reactions: many(videoReactions),
 }));
 
 export const userRelations = relations(users, ({ many }) => ({
