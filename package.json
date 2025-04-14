@@ -13,6 +13,7 @@
     "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio",
     "db:push": "drizzle-kit push",
+    "db:pull": "drizzle-kit pull",
     "seeder": "bun run /src/scripts/seed-categories.ts",
     "seeder:delete": "bun run /src/scripts/seed-categories.ts -d"
   },
