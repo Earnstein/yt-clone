@@ -14,8 +14,8 @@ interface VideoTopRowProps {
 export const VideoTopRow: React.FC<VideoTopRowProps> = ({ video }) => {
   const viewsAndDates = useMemo(() => {
     return {
-      compactViews: formatNumber(2400, { notation: "compact" }),
-      expandedViews: formatNumber(2490, { notation: "standard" }),
+      compactViews: formatNumber(video.viewCount, { notation: "compact" }),
+      expandedViews: formatNumber(video.viewCount, { notation: "standard" }),
       compactDate: formatDistanceToNow(video.createdAt, { addSuffix: true }),
       expandedDate: formatDate(
         video.createdAt,
@@ -27,7 +27,7 @@ export const VideoTopRow: React.FC<VideoTopRowProps> = ({ video }) => {
         " "
       ),
     };
-  }, [video.createdAt]);
+  }, [video.createdAt, video.viewCount]);
 
   return (
     <div className="flex flex-col gap-4 mt-4">
