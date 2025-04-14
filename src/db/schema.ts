@@ -14,6 +14,7 @@ import {
   createUpdateSchema,
 } from "drizzle-zod";
 
+// Users schema
 export const users = pgTable("users", {
   id: text("id").primaryKey(),
   email: text("email").notNull().unique(),
@@ -25,6 +26,7 @@ export const users = pgTable("users", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
+// Categories schema
 export const categories = pgTable(
   "categories",
   {
@@ -40,6 +42,7 @@ export const categories = pgTable(
 // Video visibility
 export const visibility = pgEnum("visibility", ["public", "private"]);
 
+// Videos schema
 export const videos = pgTable("videos", {
   id: text("id").primaryKey(),
   title: text("title").notNull(),
@@ -69,6 +72,7 @@ export const videos = pgTable("videos", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
+// Video views schema
 export const videoViews = pgTable(
   "video_views",
   {
@@ -94,14 +98,33 @@ export const videoViews = pgTable(
   ]
 );
 
-// This helps generate zod schemas for the video table
-export const videoInsertSchema = createInsertSchema(videos);
-export const videoSelectSchema = createSelectSchema(videos);
-export const videoUpdateSchema = createUpdateSchema(videos);
+const reactionTypes = pgEnum("reaction_types", ["like", "dislike"]);
 
-export const videoViewInsertSchema = createInsertSchema(videoViews);
-export const videoViewSelectSchema = createSelectSchema(videoViews);
-export const videoViewUpdateSchema = createUpdateSchema(videoViews);
+// Video reactions schema
+export const videoReactions = pgTable(
+  "video_reactions",
+  {
+    userId: text("user_id")
+      .references(() => users.id, {
+        onDelete: "cascade",
+      })
+      .notNull(),
+    videoId: text("video_id")
+      .references(() => videos.id, {
+        onDelete: "cascade",
+      })
+      .notNull(),
+    type: reactionTypes("type").notNull(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  },
+  (t) => [
+    primaryKey({
+      name: "id",
+      columns: [t.userId, t.videoId],
+    }),
+  ]
+);
 
 /*
 Note: This is for application-level use only and doesn't affect database-level relations.
@@ -121,10 +144,13 @@ export const videoRelations = relations(videos, ({ one, many }) => ({
     references: [categories.id],
   }),
   views: many(videoViews),
+  reactions: many(videoReactions),
 }));
 
 export const userRelations = relations(users, ({ many }) => ({
   videos: many(videos),
+  videoViews: many(videoViews),
+  videoReactions: many(videoReactions),
 }));
 
 export const categoryRelations = relations(categories, ({ many }) => ({
@@ -141,3 +167,27 @@ export const videoViewRelations = relations(videoViews, ({ one }) => ({
     references: [videos.id],
   }),
 }));
+
+export const videoReactionRelations = relations(videoReactions, ({ one }) => ({
+  user: one(users, {
+    fields: [videoReactions.userId],
+    references: [users.id],
+  }),
+  video: one(videos, {
+    fields: [videoReactions.videoId],
+    references: [videos.id],
+  }),
+}));
+
+// This helps generate zod schemas for the video table
+export const videoInsertSchema = createInsertSchema(videos);
+export const videoSelectSchema = createSelectSchema(videos);
+export const videoUpdateSchema = createUpdateSchema(videos);
+
+export const videoViewInsertSchema = createInsertSchema(videoViews);
+export const videoViewSelectSchema = createSelectSchema(videoViews);
+export const videoViewUpdateSchema = createUpdateSchema(videoViews);
+
+export const videoReactionInsertSchema = createInsertSchema(videoReactions);
+export const videoReactionSelectSchema = createSelectSchema(videoReactions);
+export const videoReactionUpdateSchema = createUpdateSchema(videoReactions);
