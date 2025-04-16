@@ -3,8 +3,16 @@ import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import { ThumbsDownIcon, ThumbsUpIcon } from "lucide-react";
 
+interface VideoReactionProps {
+  likeCount: number;
+  dislikeCount: number;
+}
+
 //TODO: implement videoreaction
-export const VideoReactions = () => {
+export const VideoReactions: React.FC<VideoReactionProps> = ({
+  dislikeCount,
+  likeCount,
+}) => {
   const viewReactions: "like" | "dislike" = "like";
   return (
     <div className="flex flex-none items-center">
@@ -15,7 +23,7 @@ export const VideoReactions = () => {
         <ThumbsUpIcon
           className={cn("size-5", viewReactions === "like" && "fill-black")}
         />
-        1
+        {likeCount}
       </Button>
       <Separator orientation="vertical" className="h-7" />
 
@@ -26,7 +34,7 @@ export const VideoReactions = () => {
         <ThumbsDownIcon
           className={cn("size-5", viewReactions !== "like" && "fill-black")}
         />
-        1
+        {dislikeCount}
       </Button>
     </div>
   );
