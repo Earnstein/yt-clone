@@ -36,7 +36,10 @@ export const VideoTopRow: React.FC<VideoTopRowProps> = ({ video }) => {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <VideoOwner user={video.user} videoId={video.id} />
         <div className="flex overflow-x-auto sm:min-w-[calc(50%-6px)] sm:justify-end sm:overflow-visible pb-2 -mb-2 sm:pb-0 sm:mb-0 gap-2">
-          <VideoReactions />
+          <VideoReactions
+            likeCount={video.likeCount}
+            dislikeCount={video.dislikeCount}
+          />
           <VideoMenus videoId={video.id} variant="secondary" />
         </div>
       </div>
