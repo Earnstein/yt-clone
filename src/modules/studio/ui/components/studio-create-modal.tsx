@@ -18,6 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Textarea } from "@/components/ui/textarea";
 import { trpc } from "@/trpc/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PlusIcon } from "lucide-react";
@@ -34,6 +35,7 @@ const createVideoSchema = z.object({
     .min(1, { message: "Description is required" })
     .max(128),
   categoryId: z.string().min(1, { message: "Category is required" }),
+  visibility: z.enum(["public", "private"]),
 });
 
 type TCreateVideo = z.infer<typeof createVideoSchema>;
@@ -48,6 +50,7 @@ export const StudioCreateModal = () => {
       title: "",
       description: "",
       categoryId: "",
+      visibility: "public",
     },
     resolver: zodResolver(createVideoSchema),
   });
@@ -142,7 +145,7 @@ export const StudioCreateModal = () => {
                 <FormItem>
                   <FormLabel>Description</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Textarea {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -170,6 +173,29 @@ export const StudioCreateModal = () => {
                       </div>
                     </SelectContent>
                     <FormMessage />
+                  </Select>
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="visibility"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Visibility</FormLabel>
+                  <Select
+                    value={String(field.value)}
+                    onValueChange={field.onChange}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a visibility" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="public">Public</SelectItem>
+                      <SelectItem value="private">Private</SelectItem>
+                    </SelectContent>
                   </Select>
                 </FormItem>
               )}
