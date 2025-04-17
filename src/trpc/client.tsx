@@ -2,13 +2,13 @@
 // ^-- to make sure we can mount the Provider from a server component
 import type { QueryClient } from "@tanstack/react-query";
 import { QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { httpBatchLink } from "@trpc/client";
 import { createTRPCReact } from "@trpc/react-query";
 import { useState } from "react";
 import superjson from "superjson";
 import { makeQueryClient } from "./query-client";
 import type { AppRouter } from "./routers/_app";
-
 export const trpc = createTRPCReact<AppRouter>();
 let clientQueryClientSingleton: QueryClient;
 function getQueryClient() {
@@ -57,7 +57,7 @@ export function TRPCProvider(
     <trpc.Provider client={trpcClient} queryClient={queryClient}>
       <QueryClientProvider client={queryClient}>
         {props.children}
-        {/* <ReactQueryDevtools initialIsOpen={false} /> */}
+        <ReactQueryDevtools initialIsOpen={false} />
       </QueryClientProvider>
     </trpc.Provider>
   );
