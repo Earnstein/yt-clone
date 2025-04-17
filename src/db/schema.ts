@@ -126,6 +126,31 @@ export const videoReactions = pgTable(
   ]
 );
 
+// Subscriptions schema
+export const subscriptions = pgTable(
+  "subscriptions",
+  {
+    viewerId: text("viewer_id")
+      .references(() => users.id, {
+        onDelete: "cascade",
+      })
+      .notNull(),
+    creatorId: text("creator_id")
+      .references(() => users.id, {
+        onDelete: "cascade",
+      })
+      .notNull(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  },
+  (t) => [
+    primaryKey({
+      name: "subscription_pk",
+      columns: [t.viewerId, t.creatorId],
+    }),
+  ]
+);
+
 /*
 Note: This is for application-level use only and doesn't affect database-level relations.
 It's useful for query like builders as in Prisma (e.g., video.findMany({ include: { user: true } }))
@@ -150,6 +175,12 @@ export const userRelations = relations(users, ({ many }) => ({
   videos: many(videos),
   videoViews: many(videoViews),
   videoReactions: many(videoReactions),
+  subscriptions: many(subscriptions, {
+    relationName: "subscriptions_viewer_id_fk",
+  }),
+  subscribers: many(subscriptions, {
+    relationName: "subscriptions_creator_id_fk",
+  }),
 }));
 
 export const categoryRelations = relations(categories, ({ many }) => ({
@@ -178,6 +209,19 @@ export const videoReactionRelations = relations(videoReactions, ({ one }) => ({
   }),
 }));
 
+export const subscriptionRelations = relations(subscriptions, ({ one }) => ({
+  viewer: one(users, {
+    fields: [subscriptions.viewerId],
+    references: [users.id],
+    relationName: "subscriptions_viewer_id_fk",
+  }),
+  creator: one(users, {
+    fields: [subscriptions.creatorId],
+    references: [users.id],
+    relationName: "subscriptions_creator_id_fk",
+  }),
+}));
+
 // This helps generate zod schemas for the video table
 export const videoInsertSchema = createInsertSchema(videos);
 export const videoSelectSchema = createSelectSchema(videos);
@@ -190,3 +234,7 @@ export const videoViewUpdateSchema = createUpdateSchema(videoViews);
 export const videoReactionInsertSchema = createInsertSchema(videoReactions);
 export const videoReactionSelectSchema = createSelectSchema(videoReactions);
 export const videoReactionUpdateSchema = createUpdateSchema(videoReactions);
+
+export const subscriptionInsertSchema = createInsertSchema(subscriptions);
+export const subscriptionSelectSchema = createSelectSchema(subscriptions);
+export const subscriptionUpdateSchema = createUpdateSchema(subscriptions);
