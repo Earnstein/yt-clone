@@ -2,7 +2,7 @@ import { Button, ButtonProps } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 interface SubscriptionButtonProps {
   onClick: ButtonProps["onClick"];
-  disabled: boolean;
+  disabled?: boolean;
   isSubscribed: boolean;
   className?: string;
   size?: ButtonProps["size"];
@@ -10,7 +10,7 @@ interface SubscriptionButtonProps {
 
 export const SubscriptionButton: React.FC<SubscriptionButtonProps> = ({
   isSubscribed,
-  disabled,
+  disabled = false,
   onClick,
   className,
   size,
