@@ -5,12 +5,21 @@ import { useUser } from "@clerk/nextjs";
 import React, { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { VideoBanner } from "../components/video-banner";
-import { VideoPlayer } from "../components/video-player";
-import { VideoTopRow } from "../components/video-top-row";
+import { VideoPlayer, VideoPlayerSkeleton } from "../components/video-player";
+import { VideoTopRow, VideoTopRowSkeleton } from "../components/video-top-row";
 
 interface VideoSectionProps {
   videoId: string;
 }
+
+const VideoSectionSkeleton = () => {
+  return (
+    <>
+      <VideoPlayerSkeleton />
+      <VideoTopRowSkeleton />
+    </>
+  );
+};
 
 const VideoSectionSuspense: React.FC<VideoSectionProps> = ({ videoId }) => {
   const { isSignedIn } = useUser();
@@ -47,7 +56,7 @@ const VideoSectionSuspense: React.FC<VideoSectionProps> = ({ videoId }) => {
 
 export const VideoSection: React.FC<VideoSectionProps> = ({ videoId }) => {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<VideoSectionSkeleton />}>
       <ErrorBoundary fallback={<div>Error</div>}>
         <VideoSectionSuspense videoId={videoId} />
       </ErrorBoundary>
