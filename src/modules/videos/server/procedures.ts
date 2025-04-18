@@ -1,5 +1,6 @@
 import { db } from "@/db";
 import {
+  subscriptions,
   users,
   videoReactions,
   videos,
@@ -15,7 +16,7 @@ import {
   protectedProcedure,
 } from "@/trpc/init";
 import { TRPCError } from "@trpc/server";
-import { and, eq, getTableColumns, inArray } from "drizzle-orm";
+import { and, eq, getTableColumns, inArray, isNotNull } from "drizzle-orm";
 import { UTApi } from "uploadthing/server";
 import { z } from "zod";
 export const videosRouter = createTRPCRouter({
@@ -24,6 +25,7 @@ export const videosRouter = createTRPCRouter({
     .query(async ({ input, ctx }) => {
       const { clerkUserId } = ctx;
 
+      // Get the current user (if logged in)
       let userId;
       const [user] = await db
         .select()
@@ -33,6 +35,8 @@ export const videosRouter = createTRPCRouter({
       if (user) {
         userId = user.id;
       }
+
+      // Get the current user's reactions to videos
       const viewerReactions = db.$with("viewer_reactions").as(
         db
           .select({
@@ -42,34 +46,55 @@ export const videosRouter = createTRPCRouter({
           .from(videoReactions)
           .where(inArray(videoReactions.userId, userId ? [userId] : []))
       );
+
+      // Get the current user's subscriptions
+      const viewerSubscriptions = db.$with("viewer_subscriptions").as(
+        db
+          .select()
+          .from(subscriptions)
+          .where(inArray(subscriptions.viewerId, userId ? [userId] : []))
+      );
+
+      // Fetch the video and join with user, reactions, and subscriptions
       const [video] = await db
-        .with(viewerReactions)
+        .with(viewerReactions, viewerSubscriptions)
         .select({
           ...getTableColumns(videos),
           user: {
-            ...getTableColumns(users),
+            ...getTableColumns(users), // get the user columns
+            viewerSubscribed: isNotNull(viewerSubscriptions.viewerId).mapWith(
+              Boolean
+            ), // check if the viewer is subscribed to the user
+            subscriberCount: db.$count(
+              subscriptions,
+              eq(subscriptions.creatorId, users.id)
+            ), // count the number of subscribers
           },
-          viewCount: db.$count(videoViews, eq(videoViews.videoId, videos.id)),
+          viewCount: db.$count(videoViews, eq(videoViews.videoId, videos.id)), // count the number of views
           likeCount: db.$count(
             videoReactions,
             and(
               eq(videoReactions.videoId, videos.id),
               eq(videoReactions.type, "like")
             )
-          ),
+          ), // count the number of likes
           dislikeCount: db.$count(
             videoReactions,
             and(
               eq(videoReactions.videoId, videos.id),
               eq(videoReactions.type, "dislike")
             )
-          ),
-          viewerReaction: viewerReactions.type,
+          ), // count the number of dislikes
+          viewerReaction: viewerReactions.type, // get the viewer's reaction to the video
         })
         .from(videos)
-        .where(and(eq(videos.id, input.id)))
         .innerJoin(users, eq(videos.userId, users.id))
-        .leftJoin(viewerReactions, eq(viewerReactions.videoId, videos.id));
+        .leftJoin(viewerReactions, eq(viewerReactions.videoId, videos.id))
+        .leftJoin(
+          viewerSubscriptions,
+          eq(viewerSubscriptions.creatorId, users.id)
+        )
+        .where(and(eq(videos.id, input.id)));
 
       if (!video) {
         throw new TRPCError({ code: "NOT_FOUND", message: "Video not found" });
@@ -82,6 +107,7 @@ export const videosRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { id: userId } = ctx.user;
 
+      // Find the video for the current user
       const [video] = await db
         .select()
         .from(videos)
@@ -92,7 +118,7 @@ export const videosRouter = createTRPCRouter({
         throw new TRPCError({ code: "NOT_FOUND", message: "Video not found" });
       }
 
-      // Check if video has a thumbnail
+      // If video has a thumbnail, delete it from UploadThing and DB
       if (video.thumbnailKey) {
         const utApi = new UTApi();
 
@@ -118,10 +144,11 @@ export const videosRouter = createTRPCRouter({
         });
       }
 
-      // Generate the thumbnail url
+      // Generate the thumbnail url from mux
       const generatedThumbnailUrl = `https://image.mux.com/${video.muxPlaybackId}/thumbnail.jpg`;
 
       const utApi = new UTApi();
+      // Upload the generated thumbnail to UploadThing
       const { data: thumbnailData, error: thumbnailError } =
         await utApi.uploadFilesFromUrl(generatedThumbnailUrl);
 
@@ -132,7 +159,7 @@ export const videosRouter = createTRPCRouter({
         });
       }
 
-      // Update the video to add the thumbnail
+      // Update the video with the new thumbnail info
       const [updatedVideo] = await db
         .update(videos)
         .set({
@@ -150,9 +177,9 @@ export const videosRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      // TODO: to turn this into a upload procedure
       const { id: userId } = ctx.user;
 
+      // Find the video by ID
       const video = await db
         .select()
         .from(videos)
@@ -164,10 +191,12 @@ export const videosRouter = createTRPCRouter({
         throw new Error("Video not found");
       }
 
+      // Check if the current user owns the video
       if (video[0].userId !== userId) {
         throw new Error("You are not allowed to upload this video");
       }
 
+      // Create a new Mux upload for the video
       const upload = await mux.video.uploads.create({
         new_asset_settings: {
           passthrough: videoId,
@@ -178,9 +207,10 @@ export const videosRouter = createTRPCRouter({
             },
           ],
         },
-        cors_origin: "*", // TODO: in production, restrict this to the frontend domain
+        cors_origin: "*",
       });
 
+      // Update the video with the mux upload ID
       await db
         .update(videos)
         .set({
@@ -203,6 +233,7 @@ export const videosRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { id: userId } = ctx.user;
 
+      // Insert the new video into the database
       const video = await db.insert(videos).values({
         id: generateUniqueId(VIDEO_ID_PREFIX),
         userId,
@@ -225,6 +256,7 @@ export const videosRouter = createTRPCRouter({
         });
       }
 
+      // Update the video with new data
       const video = await db
         .update(videos)
         .set({
@@ -246,6 +278,7 @@ export const videosRouter = createTRPCRouter({
       const { id: userId } = ctx.user;
       const utApi = new UTApi();
 
+      // Delete the video from the database
       const [video] = await db
         .delete(videos)
         .where(and(eq(videos.id, input.id), eq(videos.userId, userId)))
