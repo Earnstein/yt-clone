@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { UserAvatar } from "@/components/user-avatar";
+import { useSubscription } from "@/modules/subscriptions/hooks/use-subscription";
 import { SubscriptionButton } from "@/modules/subscriptions/ui/components/subscription-button";
 import { UserInfo } from "@/modules/users/ui/components/user-info";
 import { useAuth } from "@clerk/nextjs";
@@ -13,7 +14,14 @@ interface VideoOwnerProps {
 }
 
 export const VideoOwner: React.FC<VideoOwnerProps> = ({ user, videoId }) => {
-  const { userId } = useAuth();
+  const { userId, isLoaded } = useAuth();
+  const { onSubscribe } = useSubscription({
+    userId: user.id,
+    isSubscribed: user.viewerSubscribed,
+    fromVideoId: videoId,
+  });
+
+  // Check if the current user is the owner of the video
   const isOwner = userId === user.id;
   return (
     <div className="flex gap-3 justify-between items-center min-w-0 sm:items-start sm:justify-start">
@@ -28,7 +36,7 @@ export const VideoOwner: React.FC<VideoOwnerProps> = ({ user, videoId }) => {
             <UserInfo name={`${user.firstName} ${user.lastName}`} size="lg" />
             <span className="text-sm text-muted-foreground line-clamp-1">
               {/* TODO: to build subscribers count */}
-              {0} subscribers
+              {user.subscriberCount} subscribers
             </span>
           </div>
         </div>
@@ -41,9 +49,9 @@ export const VideoOwner: React.FC<VideoOwnerProps> = ({ user, videoId }) => {
         </Link>
       ) : (
         <SubscriptionButton
-          onClick={() => {}}
-          disabled={false}
-          isSubscribed={false}
+          onClick={onSubscribe}
+          disabled={!isLoaded}
+          isSubscribed={user.viewerSubscribed}
           className="flex-none"
         />
       )}
