@@ -61,10 +61,11 @@ export const VideoReactions: React.FC<VideoReactionProps> = ({
       if (context?.prevData) {
         utils.videos.getOne.setData({ id: videoId }, context.prevData);
       }
-      toast.error("Something went wrong");
       // Show login modal if unauthorized
       if (error.data?.code === "UNAUTHORIZED") {
         clerk.openSignIn();
+      } else {
+        toast.error("Something went wrong");
       }
     },
 
@@ -110,10 +111,10 @@ export const VideoReactions: React.FC<VideoReactionProps> = ({
         utils.videos.getOne.setData({ id: videoId }, context.prevData);
       }
 
-      //Toast and show login modal if unauthorized
-      toast.error("Something went wrong");
       if (error.data?.code === "UNAUTHORIZED") {
         clerk.openSignIn();
+      } else {
+        toast.error("Something went wrong");
       }
     },
 
