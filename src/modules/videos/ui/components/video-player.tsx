@@ -14,6 +14,9 @@ interface VideoPlayerProps {
   autoPlay?: boolean;
   onPlay?: () => void;
 }
+export const VideoPlayerSkeleton = () => {
+  return <div className="aspect-video w-full bg-black rounded-xl" />;
+};
 
 export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   playbackId,
