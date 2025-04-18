@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
+  ClerkLoading,
   SignedIn,
   SignedOut,
   SignInButton,
@@ -16,7 +17,12 @@ export const AuthButton = () => {
   const pathname = usePathname();
   //TODO: Add auth functionality
 
-  if (!isLoaded) return <Skeleton className="size-9 rounded-full" />;
+  if (!isLoaded)
+    return (
+      <ClerkLoading>
+        <Skeleton className="size-9 rounded-full" />
+      </ClerkLoading>
+    );
 
   return (
     <>
