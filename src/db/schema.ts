@@ -98,6 +98,24 @@ export const videoViews = pgTable(
   ]
 );
 
+// Video comments schema
+export const comments = pgTable("comments", {
+  id: text("id").primaryKey(),
+  videoId: text("video_id")
+    .references(() => videos.id, {
+      onDelete: "cascade",
+    })
+    .notNull(),
+  userId: text("user_id")
+    .references(() => users.id, {
+      onDelete: "cascade",
+    })
+    .notNull(),
+  comment: text("comment").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
 export const reactionTypes = pgEnum("reaction_types", ["like", "dislike"]);
 
 // Video reactions schema
@@ -181,13 +199,14 @@ export const userRelations = relations(users, ({ many }) => ({
   subscribers: many(subscriptions, {
     relationName: "subscriptions_creator_id_fk",
   }),
+  comments: many(comments),
 }));
 
 export const categoryRelations = relations(categories, ({ many }) => ({
   videos: many(videos),
 }));
 
-export const videoViewRelations = relations(videoViews, ({ one }) => ({
+export const videoViewRelations = relations(videoViews, ({ one, many }) => ({
   user: one(users, {
     fields: [videoViews.userId],
     references: [users.id],
@@ -196,6 +215,7 @@ export const videoViewRelations = relations(videoViews, ({ one }) => ({
     fields: [videoViews.videoId],
     references: [videos.id],
   }),
+  comments: many(comments),
 }));
 
 export const videoReactionRelations = relations(videoReactions, ({ one }) => ({
@@ -222,6 +242,17 @@ export const subscriptionRelations = relations(subscriptions, ({ one }) => ({
   }),
 }));
 
+export const commentRelations = relations(comments, ({ one }) => ({
+  user: one(users, {
+    fields: [comments.userId],
+    references: [users.id],
+  }),
+  video: one(videos, {
+    fields: [comments.videoId],
+    references: [videos.id],
+  }),
+}));
+
 // This helps generate zod schemas for the video table
 export const videoInsertSchema = createInsertSchema(videos);
 export const videoSelectSchema = createSelectSchema(videos);
@@ -238,3 +269,7 @@ export const videoReactionUpdateSchema = createUpdateSchema(videoReactions);
 export const subscriptionInsertSchema = createInsertSchema(subscriptions);
 export const subscriptionSelectSchema = createSelectSchema(subscriptions);
 export const subscriptionUpdateSchema = createUpdateSchema(subscriptions);
+
+export const commentInsertSchema = createInsertSchema(comments);
+export const commentSelectSchema = createSelectSchema(comments);
+export const commentUpdateSchema = createUpdateSchema(comments);
