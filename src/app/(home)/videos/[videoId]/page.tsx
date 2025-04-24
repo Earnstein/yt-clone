@@ -10,6 +10,8 @@ type PageProps = {
 const Page: NextPage<PageProps> = async ({ params }) => {
   const { videoId } = await params;
   void trpc.videos.getOne.prefetch({ id: videoId });
+  //TODO: change this to prefetch Infinite Query LATER
+  void trpc.comments.getMany.prefetch({ videoId });
   return (
     <HydrateClient>
       <VideoView videoId={videoId} />
