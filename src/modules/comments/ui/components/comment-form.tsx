@@ -22,6 +22,7 @@ interface CommentFormProps {
 }
 const commentFormSchema = commentInsertSchema.omit({
   userId: true,
+  id: true,
 });
 export const CommentForm: React.FC<CommentFormProps> = ({
   videoId,
@@ -46,10 +47,10 @@ export const CommentForm: React.FC<CommentFormProps> = ({
   });
 
   const handleSubmit = (data: TCreateComment) => {
-    console.log(data);
-    createMutation.mutate(data);
+    return createMutation.mutate(data);
   };
 
+  const isDisabled = createMutation.isPending || !form.formState.isValid;
   return (
     <Form {...form}>
       <form
@@ -79,7 +80,7 @@ export const CommentForm: React.FC<CommentFormProps> = ({
             )}
           />
           <div className="flex gap-2 justify-end">
-            <Button type="submit" disabled={createMutation.isPending}>
+            <Button type="submit" disabled={isDisabled}>
               {createMutation.isPending ? "Commenting..." : "Comment"}
             </Button>
           </div>
