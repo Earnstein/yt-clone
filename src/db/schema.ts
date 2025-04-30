@@ -1,5 +1,6 @@
 import { relations } from "drizzle-orm";
 import {
+  index,
   integer,
   pgEnum,
   pgTable,
@@ -99,22 +100,26 @@ export const videoViews = pgTable(
 );
 
 // Video comments schema
-export const comments = pgTable("comments", {
-  id: text("id").primaryKey(),
-  videoId: text("video_id")
-    .references(() => videos.id, {
-      onDelete: "cascade",
-    })
-    .notNull(),
-  userId: text("user_id")
-    .references(() => users.id, {
-      onDelete: "cascade",
-    })
-    .notNull(),
-  comment: text("comment").notNull(),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
-});
+export const comments = pgTable(
+  "comments",
+  {
+    id: text("id").primaryKey(),
+    videoId: text("video_id")
+      .references(() => videos.id, {
+        onDelete: "cascade",
+      })
+      .notNull(),
+    userId: text("user_id")
+      .references(() => users.id, {
+        onDelete: "cascade",
+      })
+      .notNull(),
+    comment: text("comment").notNull(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  },
+  (t) => [index("comments_video_id_idx").on(t.videoId)]
+);
 
 export const reactionTypes = pgEnum("reaction_types", ["like", "dislike"]);
 
