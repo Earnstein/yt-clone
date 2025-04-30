@@ -82,3 +82,11 @@ export function formatNumber(
     ...opts,
   }).format(number);
 }
+
+export function getFullName(user: {
+  firstName: string | null;
+  lastName: string | null;
+}): string {
+  if (!user.firstName && !user.lastName) return "";
+  return `${user.firstName} ${user.lastName}`;
+}
