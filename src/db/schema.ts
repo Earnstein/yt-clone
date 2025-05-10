@@ -123,6 +123,31 @@ export const comments = pgTable(
 
 export const reactionTypes = pgEnum("reaction_types", ["like", "dislike"]);
 
+// Comment reactions schema
+export const commentReactions = pgTable(
+  "comment_reactions",
+  {
+    userId: text("user_id")
+      .references(() => users.id, {
+        onDelete: "cascade",
+      })
+      .notNull(),
+    commentId: text("comment_id")
+      .references(() => comments.id, {
+        onDelete: "cascade",
+      })
+      .notNull(),
+    type: reactionTypes("type").notNull(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  },
+  (t) => [
+    primaryKey({
+      name: "comment_reactions_pk",
+      columns: [t.userId, t.commentId],
+    }),
+  ]
+);
 // Video reactions schema
 export const videoReactions = pgTable(
   "video_reactions",
@@ -182,6 +207,24 @@ It is not necessary for Drizzle's select and join operations. It's included here
 
 refer to https://orm.drizzle.team/docs/relations for more information
 */
+
+/* 
+Example of how to read the relations
+
+i.e A video can belong to a user and only one user.
+A video can belong to one category and only one category.
+A video can have many views.
+A video can have many reactions.
+A video can have many comments.
+
+Example of how to use the relations
+const video = await db.query.videos.findFirst({
+  where: eq(videos.id, "1"),
+  with: {
+    user: true,
+  },
+});
+*/
 export const videoRelations = relations(videos, ({ one, many }) => ({
   user: one(users, {
     fields: [videos.userId],
@@ -205,6 +248,7 @@ export const userRelations = relations(users, ({ many }) => ({
     relationName: "subscriptions_creator_id_fk",
   }),
   comments: many(comments),
+  commentReactions: many(commentReactions),
 }));
 
 export const categoryRelations = relations(categories, ({ many }) => ({
@@ -247,7 +291,7 @@ export const subscriptionRelations = relations(subscriptions, ({ one }) => ({
   }),
 }));
 
-export const commentRelations = relations(comments, ({ one }) => ({
+export const commentRelations = relations(comments, ({ one, many }) => ({
   user: one(users, {
     fields: [comments.userId],
     references: [users.id],
@@ -256,7 +300,22 @@ export const commentRelations = relations(comments, ({ one }) => ({
     fields: [comments.videoId],
     references: [videos.id],
   }),
+  commentReactions: many(commentReactions),
 }));
+
+export const commentReactionRelations = relations(
+  commentReactions,
+  ({ one }) => ({
+    user: one(users, {
+      fields: [commentReactions.userId],
+      references: [users.id],
+    }),
+    comment: one(comments, {
+      fields: [commentReactions.commentId],
+      references: [comments.id],
+    }),
+  })
+);
 
 // This helps generate zod schemas for the video table
 export const videoInsertSchema = createInsertSchema(videos);
