@@ -72,7 +72,7 @@ export const CommentItem: React.FC<CommentItemProps> = ({ comment }) => {
               <EllipsisVerticalIcon className="size-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent>
+          <DropdownMenuContent side="right">
             <DropdownMenuItem onClick={() => {}}>
               <MessageSquareIcon className="size-4" />
               Reply
