@@ -13,6 +13,8 @@ import { formatDistanceToNow } from "date-fns";
 import {
   EllipsisVerticalIcon,
   MessageSquareIcon,
+  ThumbsDownIcon,
+  ThumbsUpIcon,
   Trash2Icon,
 } from "lucide-react";
 import Link from "next/link";
@@ -42,6 +44,32 @@ export const CommentItem: React.FC<CommentItemProps> = ({ comment }) => {
     }
   );
 
+  const likeMutation = trpc.commentReactions.like.useMutation({
+    onSuccess: () => {
+      utils.comments.getMany.invalidate({ videoId: comment.videoId });
+    },
+    onError: (error) => {
+      toast.error("Something went wrong");
+      if (error.data?.code === "UNAUTHORIZED") {
+        toast.error("You are not authorized to like this comment");
+        openSignIn({ redirectUrl: "/sign-in" });
+      }
+    },
+  });
+
+  const dislikeMutation = trpc.commentReactions.dislike.useMutation({
+    onSuccess: () => {
+      utils.comments.getMany.invalidate({ videoId: comment.videoId });
+    },
+    onError: (error) => {
+      toast.error("Something went wrong");
+      if (error.data?.code === "UNAUTHORIZED") {
+        toast.error("You are not authorized to dislike this comment");
+        openSignIn({ redirectUrl: "/sign-in" });
+      }
+    },
+  });
+
   return (
     <div className={cn("flex flex-col gap-2", isPending && "opacity-50")}>
       <div className="flex gap-4">
@@ -64,7 +92,48 @@ export const CommentItem: React.FC<CommentItemProps> = ({ comment }) => {
             </p>
           </Link>
           <p className="text-sm text-muted-foreground">{comment.comment}</p>
-          {/* TODO: Reactions */}
+
+          <div className="flex items-center gap-2">
+            <div className="flex items-center">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="size-8"
+                onClick={() => {
+                  likeMutation.mutate({ commentId: comment.id });
+                }}
+                disabled={likeMutation.isPending || dislikeMutation.isPending}
+              >
+                <ThumbsUpIcon
+                  className={cn(
+                    comment.viewerReaction === "like" && "fill-black"
+                  )}
+                />
+              </Button>
+              <span className="text-xs text-muted-foreground">
+                {comment.likeCount}
+              </span>
+
+              <Button
+                variant="ghost"
+                size="icon"
+                className="size-8"
+                onClick={() => {
+                  dislikeMutation.mutate({ commentId: comment.id });
+                }}
+                disabled={likeMutation.isPending || dislikeMutation.isPending}
+              >
+                <ThumbsDownIcon
+                  className={cn(
+                    comment.viewerReaction === "dislike" && "fill-black"
+                  )}
+                />
+              </Button>
+              <span className="text-xs text-muted-foreground">
+                {comment.dislikeCount}
+              </span>
+            </div>
+          </div>
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
