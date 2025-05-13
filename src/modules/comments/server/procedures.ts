@@ -162,23 +162,21 @@ export const commentsRouter = createTRPCRouter({
           .leftJoin(viewerReaction, eq(viewerReaction.commentId, comments.id))
           .leftJoin(viewerReplies, eq(viewerReplies.parentId, comments.id))
           .where(
-            cursor
-              ? and(
-                  eq(comments.videoId, videoId),
-                  or(
+            and(
+              eq(comments.videoId, videoId),
+              parentId
+                ? eq(comments.parentId, parentId)
+                : isNull(comments.parentId),
+              cursor
+                ? or(
                     lt(comments.updatedAt, cursor.updatedAt),
                     and(
                       eq(comments.updatedAt, cursor.updatedAt),
                       lt(comments.id, cursor.id)
                     )
                   )
-                )
-              : and(
-                  eq(comments.videoId, videoId),
-                  parentId
-                    ? eq(comments.parentId, parentId)
-                    : isNull(comments.parentId)
-                )
+                : undefined
+            )
           )
           .orderBy(desc(comments.updatedAt))
           .limit(limit + 1),
