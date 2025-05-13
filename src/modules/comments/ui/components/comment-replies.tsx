@@ -45,7 +45,6 @@ export const CommentReplies: React.FC<CommentRepliesProps> = ({
       <div className="flex flex-col gap-4 mt-2">
         {data?.pages
           .flatMap((page) => page.items)
-          .filter((comment) => comment.parentId === parentId)
           .map((comment) => (
             <CommentItem key={comment.id} comment={comment} variant="reply" />
           ))}
