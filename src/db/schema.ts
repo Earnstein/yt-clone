@@ -9,6 +9,7 @@ import {
   text,
   timestamp,
   uniqueIndex,
+  varchar,
 } from "drizzle-orm/pg-core";
 import {
   createInsertSchema,
@@ -19,11 +20,11 @@ import {
 // Users schema
 export const users = pgTable("users", {
   id: text("id").primaryKey(),
-  email: text("email").notNull().unique(),
-  firstName: text("first_name"),
-  lastName: text("last_name"),
+  email: varchar("email", { length: 100 }).notNull().unique(),
+  firstName: varchar("first_name", { length: 100 }),
+  lastName: varchar("last_name", { length: 100 }),
   // TODO: add banner field
-  imageUrl: text("image_url").notNull(),
+  imageUrl: varchar("image_url", { length: 255 }).notNull(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
@@ -32,9 +33,9 @@ export const users = pgTable("users", {
 export const categories = pgTable(
   "categories",
   {
-    id: text("id").primaryKey(),
-    name: text("name").notNull().unique(),
-    description: text("description"),
+    id: varchar("id", { length: 16 }).primaryKey(),
+    name: varchar("name", { length: 32 }).notNull().unique(),
+    description: varchar("description", { length: 255 }),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     updatedAt: timestamp("updated_at").notNull().defaultNow(),
   },
@@ -46,17 +47,20 @@ export const visibility = pgEnum("visibility", ["public", "private"]);
 
 // Videos schema
 export const videos = pgTable("videos", {
-  id: text("id").primaryKey(),
-  title: text("title").notNull(),
-  description: text("description"),
+  id: varchar("id", { length: 16 }).primaryKey(),
+  title: varchar("title", { length: 128 }).notNull(),
+  description: varchar("description", { length: 255 }),
   userId: text("user_id")
     .references(() => users.id, {
       onDelete: "cascade",
     })
     .notNull(),
-  categoryId: text("category_id").references(() => categories.id, {
-    onDelete: "set null",
-  }),
+  categoryId: varchar("category_id", { length: 16 }).references(
+    () => categories.id,
+    {
+      onDelete: "set null",
+    }
+  ),
 
   muxStatus: text("mux_status"),
   muxUploadId: text("mux_upload_id").unique(),
@@ -83,7 +87,7 @@ export const videoViews = pgTable(
         onDelete: "cascade",
       })
       .notNull(),
-    videoId: text("video_id")
+    videoId: varchar("video_id", { length: 16 })
       .references(() => videos.id, {
         onDelete: "cascade",
       })
@@ -104,9 +108,9 @@ export const videoViews = pgTable(
 export const comments = pgTable(
   "comments",
   {
-    id: text("id").primaryKey(),
-    parentId: text("parent_id"),
-    videoId: text("video_id")
+    id: varchar("id", { length: 16 }).primaryKey(),
+    parentId: varchar("parent_id", { length: 16 }),
+    videoId: varchar("video_id", { length: 16 })
       .references(() => videos.id, {
         onDelete: "cascade",
       })
@@ -116,7 +120,7 @@ export const comments = pgTable(
         onDelete: "cascade",
       })
       .notNull(),
-    comment: text("comment").notNull(),
+    comment: varchar("comment", { length: 255 }).notNull(),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     updatedAt: timestamp("updated_at").notNull().defaultNow(),
   },
@@ -141,7 +145,7 @@ export const commentReactions = pgTable(
         onDelete: "cascade",
       })
       .notNull(),
-    commentId: text("comment_id")
+    commentId: varchar("comment_id", { length: 16 })
       .references(() => comments.id, {
         onDelete: "cascade",
       })
@@ -166,7 +170,7 @@ export const videoReactions = pgTable(
         onDelete: "cascade",
       })
       .notNull(),
-    videoId: text("video_id")
+    videoId: varchar("video_id", { length: 16 })
       .references(() => videos.id, {
         onDelete: "cascade",
       })
