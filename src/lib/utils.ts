@@ -87,6 +87,12 @@ export function getFullName(user: {
   firstName: string | null;
   lastName: string | null;
 }): string {
-  if (!user.firstName && !user.lastName) return "";
-  return `${user.firstName} ${user.lastName}`;
+  if (!user.firstName || !user.lastName) return "";
+  return `${
+    (user.firstName ?? "").charAt(0).toUpperCase() +
+    (user.firstName ?? "").slice(1)
+  } ${
+    (user.lastName ?? "").charAt(0).toUpperCase() +
+    (user.lastName ?? "").slice(1)
+  }`;
 }
