@@ -11,6 +11,8 @@ import { trpc } from "@/trpc/client";
 import { useClerk, useUser } from "@clerk/nextjs";
 import { formatDistanceToNow } from "date-fns";
 import {
+  ChevronDownIcon,
+  ChevronUpIcon,
   EllipsisVerticalIcon,
   MessageSquareIcon,
   ThumbsDownIcon,
@@ -22,6 +24,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { TCommentsGetAll } from "../../types";
 import { CommentForm } from "./comment-form";
+import { CommentReplies } from "./comment-replies";
 interface CommentItemProps {
   comment: TCommentsGetAll["items"][number];
   variant?: "comment" | "reply";
@@ -153,32 +156,32 @@ export const CommentItem: React.FC<CommentItemProps> = ({
             </div>
           </div>
         </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon">
-              <EllipsisVerticalIcon className="size-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent side="right">
-            {variant === "comment" && (
+        {comment.userId !== user?.id && variant === "comment" && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <EllipsisVerticalIcon className="size-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent side="right">
               <DropdownMenuItem onClick={() => setIsReplyOpen((prev) => !prev)}>
                 <MessageSquareIcon className="size-4" />
                 Reply
               </DropdownMenuItem>
-            )}
-            {user?.id === comment.userId && (
-              <DropdownMenuItem
-                onClick={() => {
-                  deleteComment({ id: comment.id });
-                }}
-                disabled={isPending}
-              >
-                <Trash2Icon className="size-4" />
-                Delete
-              </DropdownMenuItem>
-            )}
-          </DropdownMenuContent>
-        </DropdownMenu>
+              {user?.id === comment.userId && (
+                <DropdownMenuItem
+                  onClick={() => {
+                    deleteComment({ id: comment.id });
+                  }}
+                  disabled={isPending}
+                >
+                  <Trash2Icon className="size-4" />
+                  Delete
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
       </div>
 
       {isReplyOpen && variant === "comment" && (
@@ -199,13 +202,27 @@ export const CommentItem: React.FC<CommentItemProps> = ({
       {comment.replyCount > 0 && variant === "comment" && (
         <div className="mt-4 pl-14">
           <Button
-            variant="ghost"
+            variant="tertiary"
             size="sm"
             onClick={() => setIsRepliesOpen((prev) => !prev)}
           >
-            {isRepliesOpen ? "Hide Replies" : "Show Replies"}
+            {isRepliesOpen ? (
+              <ChevronUpIcon className="size-4" />
+            ) : (
+              <ChevronDownIcon className="size-4" />
+            )}
+            {comment.replyCount}{" "}
+            {comment.replyCount === 1 ? "reply" : "replies"}
           </Button>
         </div>
+      )}
+
+      {comment.replyCount > 0 && variant === "comment" && isRepliesOpen && (
+        <CommentReplies
+          videoId={comment.videoId}
+          parentId={comment.id}
+          limit={2}
+        />
       )}
     </div>
   );
