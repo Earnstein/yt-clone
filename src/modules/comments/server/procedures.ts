@@ -84,6 +84,7 @@ export const commentsRouter = createTRPCRouter({
     .input(
       z.object({
         videoId: z.string(),
+        parentId: z.string().nullish(),
         cursor: z
           .object({
             id: z.string(),
@@ -95,7 +96,7 @@ export const commentsRouter = createTRPCRouter({
     )
     .query(async ({ input, ctx }) => {
       // Get the video id from the input
-      const { videoId, cursor, limit } = input;
+      const { videoId, cursor, limit, parentId } = input;
       const { clerkUserId } = ctx;
 
       // Get the current user (if logged in)
@@ -172,7 +173,12 @@ export const commentsRouter = createTRPCRouter({
                     )
                   )
                 )
-              : and(eq(comments.videoId, videoId), isNull(comments.parentId))
+              : and(
+                  eq(comments.videoId, videoId),
+                  parentId
+                    ? eq(comments.parentId, parentId)
+                    : isNull(comments.parentId)
+                )
           )
           .orderBy(desc(comments.updatedAt))
           .limit(limit + 1),
