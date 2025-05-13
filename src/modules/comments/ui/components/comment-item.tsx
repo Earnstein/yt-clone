@@ -18,13 +18,21 @@ import {
   Trash2Icon,
 } from "lucide-react";
 import Link from "next/link";
+import { useState } from "react";
 import { toast } from "sonner";
 import { TCommentsGetAll } from "../../types";
+import { CommentForm } from "./comment-form";
 interface CommentItemProps {
   comment: TCommentsGetAll["items"][number];
+  variant?: "comment" | "reply";
 }
 
-export const CommentItem: React.FC<CommentItemProps> = ({ comment }) => {
+export const CommentItem: React.FC<CommentItemProps> = ({
+  comment,
+  variant = "comment",
+}) => {
+  const [isReplyOpen, setIsReplyOpen] = useState(false);
+  const [isRepliesOpen, setIsRepliesOpen] = useState(false);
   const { user } = useUser();
   const utils = trpc.useUtils();
   const { openSignIn } = useClerk();
@@ -132,6 +140,16 @@ export const CommentItem: React.FC<CommentItemProps> = ({ comment }) => {
               <span className="text-xs text-muted-foreground">
                 {comment.dislikeCount}
               </span>
+              {variant === "comment" && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8"
+                  onClick={() => setIsReplyOpen((prev) => !prev)}
+                >
+                  Reply
+                </Button>
+              )}
             </div>
           </div>
         </div>
@@ -142,10 +160,12 @@ export const CommentItem: React.FC<CommentItemProps> = ({ comment }) => {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent side="right">
-            <DropdownMenuItem onClick={() => {}}>
-              <MessageSquareIcon className="size-4" />
-              Reply
-            </DropdownMenuItem>
+            {variant === "comment" && (
+              <DropdownMenuItem onClick={() => setIsReplyOpen((prev) => !prev)}>
+                <MessageSquareIcon className="size-4" />
+                Reply
+              </DropdownMenuItem>
+            )}
             {user?.id === comment.userId && (
               <DropdownMenuItem
                 onClick={() => {
@@ -160,6 +180,33 @@ export const CommentItem: React.FC<CommentItemProps> = ({ comment }) => {
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
+
+      {isReplyOpen && variant === "comment" && (
+        <div className="mt-4 pl-14">
+          <CommentForm
+            videoId={comment.videoId}
+            onSuccess={() => {
+              setIsReplyOpen(false);
+              setIsRepliesOpen(true);
+            }}
+            avatarSize="sm"
+            variant="reply"
+            parentId={comment.id}
+            onCancel={() => setIsReplyOpen(false)}
+          />
+        </div>
+      )}
+      {comment.replyCount > 0 && variant === "comment" && (
+        <div className="mt-4 pl-14">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setIsRepliesOpen((prev) => !prev)}
+          >
+            {isRepliesOpen ? "Hide Replies" : "Show Replies"}
+          </Button>
+        </div>
+      )}
     </div>
   );
 };
