@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { UserAvatar } from "@/components/user-avatar";
+import { getFullName } from "@/lib/utils";
 import { useSubscription } from "@/modules/subscriptions/hooks/use-subscription";
 import { SubscriptionButton } from "@/modules/subscriptions/ui/components/subscription-button";
 import { UserInfo } from "@/modules/users/ui/components/user-info";
@@ -7,7 +8,6 @@ import { useAuth } from "@clerk/nextjs";
 import Link from "next/link";
 import React from "react";
 import { TGetOneVideoOutput } from "../../types";
-
 interface VideoOwnerProps {
   user: TGetOneVideoOutput["user"];
   videoId: TGetOneVideoOutput["id"];
@@ -29,11 +29,11 @@ export const VideoOwner: React.FC<VideoOwnerProps> = ({ user, videoId }) => {
         <div className="flex gap-2 items-center">
           <UserAvatar
             imageUrl={user.imageUrl}
-            name={`${user.firstName} ${user.lastName}`}
+            name={getFullName(user) || "user"}
             size="lg"
           />
           <div className="space-y-1 min-w-0">
-            <UserInfo name={`${user.firstName} ${user.lastName}`} size="lg" />
+            <UserInfo name={getFullName(user)} size="lg" />
             <span className="text-sm text-muted-foreground line-clamp-1">
               {/* TODO: to build subscribers count */}
               {user.subscriberCount} subscribers
