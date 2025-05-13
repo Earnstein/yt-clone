@@ -41,7 +41,7 @@ export const CommentReplies: React.FC<CommentRepliesProps> = ({
   if (isError) return <div>Error</div>;
   if (data?.pages[0].items.length === 0) return null;
   return (
-    <div className="px-14">
+    <div className="pl-14">
       <div className="flex flex-col gap-4 mt-2">
         {data?.pages
           .flatMap((page) => page.items)
