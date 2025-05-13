@@ -36,7 +36,7 @@ const CommentsSectionSuspense: React.FC<CommentsSectionProps> = ({
   return (
     <div className="mt-6">
       <div className="flex flex-col gap-6">
-        <h2 className="text-lg font-bold">
+        <h2 className="text-base sm:text-lg font-bold">
           {query.data?.pages[0].totalComments} Comments
         </h2>
         <CommentForm videoId={videoId} />
