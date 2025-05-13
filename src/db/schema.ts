@@ -1,5 +1,6 @@
 import { relations } from "drizzle-orm";
 import {
+  foreignKey,
   index,
   integer,
   pgEnum,
@@ -104,6 +105,7 @@ export const comments = pgTable(
   "comments",
   {
     id: text("id").primaryKey(),
+    parentId: text("parent_id"),
     videoId: text("video_id")
       .references(() => videos.id, {
         onDelete: "cascade",
@@ -118,7 +120,14 @@ export const comments = pgTable(
     createdAt: timestamp("created_at").notNull().defaultNow(),
     updatedAt: timestamp("updated_at").notNull().defaultNow(),
   },
-  (t) => [index("comments_video_id_idx").on(t.videoId)]
+  (t) => [
+    index("comments_video_id_idx").on(t.videoId),
+    foreignKey({
+      columns: [t.parentId],
+      foreignColumns: [t.id],
+      name: "comments_parent_id_fk",
+    }).onDelete("cascade"),
+  ]
 );
 
 export const reactionTypes = pgEnum("reaction_types", ["like", "dislike"]);
@@ -299,6 +308,14 @@ export const commentRelations = relations(comments, ({ one, many }) => ({
   video: one(videos, {
     fields: [comments.videoId],
     references: [videos.id],
+  }),
+  parent: one(comments, {
+    fields: [comments.parentId],
+    references: [comments.id],
+    relationName: "comments_parent_id_fk",
+  }),
+  children: many(comments, {
+    relationName: "comments_parent_id_fk",
   }),
   commentReactions: many(commentReactions),
 }));
