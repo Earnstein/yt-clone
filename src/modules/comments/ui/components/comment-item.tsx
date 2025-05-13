@@ -94,7 +94,9 @@ export const CommentItem: React.FC<CommentItemProps> = ({
         <div className="flex-1 min-w-0">
           <Link href={`/users/${comment.userId}`}>
             <p className="flex items-center gap-2 mb-0.5">
-              <span> {getFullName(comment.user)}</span>
+              <span className="text-sm font-medium line-clamp-1 text-ellipsis">
+                {getFullName(comment.user)}
+              </span>
               <span className="text-xs text-muted-foreground">
                 {formatDistanceToNow(comment.createdAt, {
                   addSuffix: true,
@@ -156,32 +158,30 @@ export const CommentItem: React.FC<CommentItemProps> = ({
             </div>
           </div>
         </div>
-        {comment.userId !== user?.id && variant === "comment" && (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon">
-                <EllipsisVerticalIcon className="size-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent side="right">
-              <DropdownMenuItem onClick={() => setIsReplyOpen((prev) => !prev)}>
-                <MessageSquareIcon className="size-4" />
-                Reply
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon">
+              <EllipsisVerticalIcon className="size-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent side="right">
+            <DropdownMenuItem onClick={() => setIsReplyOpen((prev) => !prev)}>
+              <MessageSquareIcon className="size-4" />
+              Reply
+            </DropdownMenuItem>
+            {user?.id === comment.userId && (
+              <DropdownMenuItem
+                onClick={() => {
+                  deleteComment({ id: comment.id });
+                }}
+                disabled={isPending}
+              >
+                <Trash2Icon className="size-4" />
+                Delete
               </DropdownMenuItem>
-              {user?.id === comment.userId && (
-                <DropdownMenuItem
-                  onClick={() => {
-                    deleteComment({ id: comment.id });
-                  }}
-                  disabled={isPending}
-                >
-                  <Trash2Icon className="size-4" />
-                  Delete
-                </DropdownMenuItem>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        )}
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       {isReplyOpen && variant === "comment" && (
