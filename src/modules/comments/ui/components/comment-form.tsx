@@ -9,6 +9,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { UserAvatar } from "@/components/user-avatar";
 import { TCreateComment } from "@/db/types";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { AVATAR_PLACEHOLDER_URL } from "@/lib/constants";
 import { trpc } from "@/trpc/client";
 import { useUser } from "@clerk/nextjs";
@@ -16,7 +17,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { commentFormSchema } from "../../schema/validation";
-
 interface CommentFormProps {
   videoId: string;
   onSuccess?: () => void;
@@ -34,6 +34,7 @@ export const CommentForm: React.FC<CommentFormProps> = ({
   parentId,
   onCancel,
 }) => {
+  const isMobile = useIsMobile();
   const { user } = useUser();
   const utils = trpc.useUtils();
   const createMutation = trpc.comments.create.useMutation({
@@ -73,7 +74,7 @@ export const CommentForm: React.FC<CommentFormProps> = ({
         <UserAvatar
           imageUrl={user?.imageUrl || AVATAR_PLACEHOLDER_URL}
           name={user?.fullName || "user"}
-          size={avatarSize}
+          size={isMobile ? "sm" : avatarSize}
         />
         <div className="flex-1 space-y-2">
           <FormField
