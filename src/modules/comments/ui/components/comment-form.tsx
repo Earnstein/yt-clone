@@ -39,6 +39,7 @@ export const CommentForm: React.FC<CommentFormProps> = ({
   const createMutation = trpc.comments.create.useMutation({
     onSuccess: () => {
       utils.comments.getMany.invalidate({ videoId });
+      utils.comments.getMany.invalidate({ videoId, parentId });
       form.reset();
       onSuccess?.();
     },
