@@ -66,8 +66,6 @@ export const ourFileRouter = {
       return { user, videoId: input.videoId };
     })
     .onUploadComplete(async ({ metadata, file }) => {
-      //* This code RUNS ON YOUR SERVER after upload
-
       // Update the video to add the thumbnail and key
       await db
         .update(videos)

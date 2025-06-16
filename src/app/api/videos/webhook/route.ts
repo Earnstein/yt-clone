@@ -87,6 +87,14 @@ export const POST = async (request: Request) => {
       const duration =
         eventData?.duration && Math.round(eventData.duration * 1000);
       // Upload thumbnail to UploadThing
+      const [video] = await db
+        .select()
+        .from(videos)
+        .where(eq(videos.id, data.passthrough));
+      if (video?.thumbnailKey && video?.previewKey) {
+        // Already uploaded, skip
+        break;
+      }
       const utApi = new UTApi();
       const [thumbnailData, previewData] = await utApi.uploadFilesFromUrl([
         generatedThumbnailUrl,
@@ -164,6 +172,7 @@ export const POST = async (request: Request) => {
     }
 
     case "video.asset.deleted": {
+      console.log("asset deleted fired");
       const eventData = data as VideoAssetDeletedWebhookEvent["data"];
 
       if (!eventData.upload_id) {
@@ -172,6 +181,19 @@ export const POST = async (request: Request) => {
           { status: 400 }
         );
       }
+      // delete uploadthing files
+      const [video] = await db
+        .select()
+        .from(videos)
+        .where(eq(videos.id, data.passthrough));
+      const keysToDelete = [video?.thumbnailKey, video?.previewKey].filter(
+        (key): key is string => Boolean(key)
+      );
+      const utApi = new UTApi();
+      if (keysToDelete.length > 0) {
+        await utApi.deleteFiles(keysToDelete);
+      }
+
       await db.delete(videos).where(eq(videos.id, data.passthrough));
 
       break;
