@@ -15,6 +15,10 @@ const Page: NextPage<PageProps> = async ({ params }) => {
     videoId,
     limit: DEFAULT_LIMIT,
   });
+  void trpc.suggestions.getSuggestions.prefetchInfinite({
+    videoId,
+    limit: DEFAULT_LIMIT,
+  });
   return (
     <HydrateClient>
       <VideoView videoId={videoId} />
