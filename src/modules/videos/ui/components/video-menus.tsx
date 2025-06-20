@@ -24,7 +24,7 @@ interface VideoMenuProps {
 // TODO: Add a playlist menu item
 export const VideoMenus: React.FC<VideoMenuProps> = ({
   videoId,
-  variant,
+  variant = "ghost",
   onRemove,
 }) => {
   const { copyToClipboard } = useCopyToClipboard({
