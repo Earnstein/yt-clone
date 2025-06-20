@@ -12,8 +12,8 @@ export const VideoView: React.FC<VideoViewProps> = ({ videoId }) => {
       <div className="flex flex-col md:flex-row gap-6">
         <div className="flex-1 min-w-0">
           <VideoSection videoId={videoId} />
-          <div className="xl:hidden block">
-            <SuggestionsSection videoId={videoId} />
+          <div className="xl:hidden block mt-4">
+            <SuggestionsSection videoId={videoId} isManual />
           </div>
           <CommentsSection videoId={videoId} />
         </div>
