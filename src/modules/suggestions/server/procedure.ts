@@ -1,9 +1,9 @@
 import { db } from "@/db";
-import { videos } from "@/db/schema";
+import { users, videoReactions, videos, videoViews } from "@/db/schema";
 import { DEFAULT_LIMIT } from "@/lib/constants";
 import { baseProcedure, createTRPCRouter } from "@/trpc/init";
 import { TRPCError } from "@trpc/server";
-import { and, desc, eq, lt, or } from "drizzle-orm";
+import { and, desc, eq, getTableColumns, lt, or } from "drizzle-orm";
 import { z } from "zod";
 export const suggestionsRouter = createTRPCRouter({
   getSuggestions: baseProcedure
@@ -32,7 +32,25 @@ export const suggestionsRouter = createTRPCRouter({
       }
 
       const data = await db
-        .select()
+        .select({
+          ...getTableColumns(videos),
+          viewCount: db.$count(videoViews, eq(videoViews.videoId, videos.id)),
+          likeCount: db.$count(
+            videoReactions,
+            and(
+              eq(videoReactions.videoId, videos.id),
+              eq(videoReactions.type, "like")
+            )
+          ),
+          dislikeCount: db.$count(
+            videoReactions,
+            and(
+              eq(videoReactions.videoId, videos.id),
+              eq(videoReactions.type, "dislike")
+            )
+          ),
+          user: users,
+        })
         .from(videos)
         .where(
           cursor
@@ -52,6 +70,7 @@ export const suggestionsRouter = createTRPCRouter({
             ? eq(videos.categoryId, existingVideo.categoryId)
             : undefined
         )
+        .innerJoin(users, eq(videos.userId, users.id))
         .orderBy(desc(videos.updatedAt), desc(videos.id))
         // Add 1 to the limit to check if there is a next page
         .limit(limit + 1);
