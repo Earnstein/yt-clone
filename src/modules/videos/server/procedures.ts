@@ -228,6 +228,7 @@ export const videosRouter = createTRPCRouter({
         title: z.string(),
         description: z.string(),
         categoryId: z.string(),
+        visibility: z.enum(["public", "private"]).default("private"),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -240,6 +241,7 @@ export const videosRouter = createTRPCRouter({
         title: input.title,
         description: input.description,
         categoryId: input.categoryId,
+        visibility: input.visibility,
       });
 
       return video;
