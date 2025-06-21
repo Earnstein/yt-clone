@@ -6,6 +6,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -44,6 +45,7 @@ import {
   ImagePlusIcon,
   Loader2,
   LockIcon,
+  RefreshCcwIcon,
   RotateCcwIcon,
   TrashIcon,
 } from "lucide-react";
@@ -184,6 +186,24 @@ const VideoSectionSuspense: React.FC<VideoSectionProps> = ({ videoId }) => {
       toast.error(error.message);
     },
   });
+
+  const revalidateVideoMutation = trpc.videos.revalidate.useMutation({
+    onMutate: () => {
+      utils.studio.getVideoById.cancel({ id: videoId });
+      toast.loading("Loading video...");
+    },
+    onSuccess: () => {
+      utils.studio.getAllVideos.invalidate();
+      toast.dismiss();
+      toast.success("success");
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+    onSettled: () => {
+      utils.studio.getVideoById.invalidate({ id: videoId });
+    },
+  });
   // Form
   const form = useForm<TUpdateVideo>({
     resolver: zodResolver(videoUpdateSchema),
@@ -245,7 +265,7 @@ const VideoSectionSuspense: React.FC<VideoSectionProps> = ({ videoId }) => {
         onOpenChange={setOpen}
       />
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="md:pr-6">
           <div className="flex items-center justify-between mb-6">
             <div>
               <h1 className="text-2xl font-bold">Video details</h1>
@@ -268,6 +288,20 @@ const VideoSectionSuspense: React.FC<VideoSectionProps> = ({ videoId }) => {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
+                  <DropdownMenuItem
+                    onClick={() => revalidateVideoMutation.mutate({ videoId })}
+                    disabled={revalidateVideoMutation.isPending}
+                  >
+                    {revalidateVideoMutation.isPending ? (
+                      <Loader2 className="size-4 mr-2 motion-preset-spin motion-duration-1500" />
+                    ) : (
+                      <RefreshCcwIcon className="size-4 mr-2" />
+                    )}
+                    {revalidateVideoMutation.isPending
+                      ? "Loading..."
+                      : "Revalidate"}
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
                   <DropdownMenuItem
                     onClick={() => deleteVideoMutation.mutate({ id: videoId })}
                     disabled={deleteVideoMutation.isPending}
