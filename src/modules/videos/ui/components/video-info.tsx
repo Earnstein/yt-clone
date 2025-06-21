@@ -1,3 +1,4 @@
+import { Skeleton } from "@/components/ui/skeleton";
 import { UserAvatar } from "@/components/user-avatar";
 import { formatNumber } from "@/lib/utils";
 import { UserInfo } from "@/modules/users/ui/components/user-info";
@@ -11,6 +12,18 @@ interface VideoInfoProps {
   video: TGetManyVideosOutput["items"][number];
   onRemove?: () => void;
 }
+
+export const VideoInfoSkeleton = () => {
+  return (
+    <div className="flex gap-3">
+      <Skeleton className="size-10 rounded-full shrink-0" />
+      <div className="min-w-0 flex-1 space-y-2">
+        <Skeleton className="h-4 w-[90%]" />
+        <Skeleton className="h-4 w-[70%]" />
+      </div>
+    </div>
+  );
+};
 
 export const VideoInfo: React.FC<VideoInfoProps> = ({ video, onRemove }) => {
   const memoizedValuess = useMemo(() => {
