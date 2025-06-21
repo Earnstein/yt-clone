@@ -1,3 +1,4 @@
+import { Skeleton } from "@/components/ui/skeleton";
 import { THUMBNAIL_PLACEHOLDER_URL } from "@/lib/constants";
 import { formatDuration } from "@/lib/utils";
 import Image from "next/image";
@@ -8,6 +9,13 @@ interface VideoThumbnailProps {
   title: string;
   duration: number;
 }
+export const VideoThumbnailSkeleton = () => {
+  return (
+    <div className="relative w-full overflow-hidden rounded-xl aspect-video">
+      <Skeleton className="size-full" />
+    </div>
+  );
+};
 export const VideoThumbnail: React.FC<VideoThumbnailProps> = ({
   thumbnailUrl,
   previewUrl,
