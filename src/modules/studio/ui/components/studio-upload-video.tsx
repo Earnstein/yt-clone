@@ -3,7 +3,6 @@ import { StudioUploader } from "@/components/studio-uploader";
 import { Button } from "@/components/ui/button";
 import { trpc } from "@/trpc/client";
 import { Loader2Icon, UploadIcon } from "lucide-react";
-import { usePathname, useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 interface StudioUploadVideoProps {
@@ -11,8 +10,6 @@ interface StudioUploadVideoProps {
 }
 
 export const StudioUploadVideoModal = ({ videoId }: StudioUploadVideoProps) => {
-  const router = useRouter();
-  const pathname = usePathname();
   const mutation = trpc.videos.uploadVideo.useMutation({
     onMutate: () => {
       toast.info("Preparing your video uploader...");
@@ -23,6 +20,11 @@ export const StudioUploadVideoModal = ({ videoId }: StudioUploadVideoProps) => {
     },
     onError: (error) => {
       toast.error(error.message);
+    },
+    onSettled: () => {
+      toast.dismiss();
+      utils.studio.getAllVideos.invalidate();
+      utils.studio.getVideoById.invalidate({ id: videoId });
     },
   });
   const utils = trpc.useUtils();
@@ -36,15 +38,11 @@ export const StudioUploadVideoModal = ({ videoId }: StudioUploadVideoProps) => {
     utils.studio.getAllVideos.invalidate();
     utils.studio.getVideoById.invalidate({ id: videoId });
 
-    if (pathname === "/studio") {
-      router.push(`/studio/videos/${videoId}`);
-    }
-
     // invalidate the query after 4 seconds after webhook is received
     setTimeout(() => {
       utils.studio.getAllVideos.invalidate();
       utils.studio.getVideoById.invalidate({ id: videoId });
-    }, 4000);
+    }, 5000);
   };
   return (
     <>

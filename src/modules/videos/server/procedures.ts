@@ -102,6 +102,59 @@ export const videosRouter = createTRPCRouter({
 
       return video;
     }),
+  revalidate: protectedProcedure
+    .input(z.object({ videoId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const { id: userId } = ctx.user;
+
+      // Find the video for the current user
+      const [video] = await db
+        .select()
+        .from(videos)
+        .where(and(eq(videos.id, input.videoId), eq(videos.userId, userId)));
+
+      // Check if video exists
+      if (!video) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Video not found" });
+      }
+
+      if (!video.muxUploadId) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "No video upload in progress. Please upload a video first.",
+        });
+      }
+
+      const upload = await mux.video.uploads.retrieve(video.muxUploadId);
+      if (!upload || !upload.asset_id) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "No video upload in progress. Please upload a video first.",
+        });
+      }
+
+      const asset = await mux.video.assets.retrieve(upload.asset_id);
+
+      if (!asset) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "No video asset found. Please upload a video first.",
+        });
+      }
+
+      const [updatedVideo] = await db
+        .update(videos)
+        .set({
+          muxPlaybackId: asset.playback_ids?.[0]?.id,
+          muxStatus: asset.status,
+          muxAssetId: asset.id,
+          duration: asset.duration ? Math.round(asset.duration * 1000) : 0,
+        })
+        .where(and(eq(videos.id, input.videoId), eq(videos.userId, userId)))
+        .returning();
+
+      return updatedVideo;
+    }),
   restoreThumbnail: protectedProcedure
     .input(z.object({ videoId: z.string() }))
     .mutation(async ({ ctx, input }) => {
@@ -170,6 +223,7 @@ export const videosRouter = createTRPCRouter({
 
       return updatedVideo;
     }),
+
   uploadVideo: protectedProcedure
     .input(
       z.object({
@@ -228,6 +282,7 @@ export const videosRouter = createTRPCRouter({
         title: z.string(),
         description: z.string(),
         categoryId: z.string(),
+        visibility: z.enum(["public", "private"]).default("private"),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -240,6 +295,7 @@ export const videosRouter = createTRPCRouter({
         title: input.title,
         description: input.description,
         categoryId: input.categoryId,
+        visibility: input.visibility,
       });
 
       return video;

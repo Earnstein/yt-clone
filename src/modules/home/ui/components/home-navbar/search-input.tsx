@@ -17,7 +17,7 @@ const SearchInput = () => {
       <Button
         variant="ghost"
         size="icon"
-        className="px-5 py-2.5 bg-gray-100 border rounded-r-full border-l-0 hover:bg-gray-200"
+        className="px-5 py-2.5 bg-gray-100 border rounded-l-none border-l-0 hover:bg-gray-200"
         type="submit"
       >
         <SearchIcon className="size-5" />

@@ -3,7 +3,7 @@ import { users, videoReactions, videos, videoViews } from "@/db/schema";
 import { DEFAULT_LIMIT } from "@/lib/constants";
 import { baseProcedure, createTRPCRouter } from "@/trpc/init";
 import { TRPCError } from "@trpc/server";
-import { and, desc, eq, getTableColumns, lt, or } from "drizzle-orm";
+import { and, desc, eq, getTableColumns, lt, ne, or } from "drizzle-orm";
 import { z } from "zod";
 export const suggestionsRouter = createTRPCRouter({
   getSuggestions: baseProcedure
@@ -53,22 +53,26 @@ export const suggestionsRouter = createTRPCRouter({
         })
         .from(videos)
         .where(
-          cursor
-            ? and(
-                existingVideo.categoryId
-                  ? eq(videos.categoryId, existingVideo.categoryId)
-                  : undefined,
-                or(
-                  lt(videos.updatedAt, cursor.updatedAt),
-                  and(
-                    eq(videos.updatedAt, cursor.updatedAt),
-                    lt(videos.id, cursor.id)
+          and(
+            eq(videos.visibility, "public"),
+            ne(videos.id, videoId),
+            cursor
+              ? and(
+                  existingVideo.categoryId
+                    ? eq(videos.categoryId, existingVideo.categoryId)
+                    : undefined,
+                  or(
+                    lt(videos.updatedAt, cursor.updatedAt),
+                    and(
+                      eq(videos.updatedAt, cursor.updatedAt),
+                      lt(videos.id, cursor.id)
+                    )
                   )
                 )
-              )
-            : existingVideo.categoryId
-            ? eq(videos.categoryId, existingVideo.categoryId)
-            : undefined
+              : existingVideo.categoryId
+              ? eq(videos.categoryId, existingVideo.categoryId)
+              : undefined
+          )
         )
         .innerJoin(users, eq(videos.userId, users.id))
         .orderBy(desc(videos.updatedAt), desc(videos.id))
