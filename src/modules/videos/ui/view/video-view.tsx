@@ -12,10 +12,10 @@ export const VideoView: React.FC<VideoViewProps> = ({ videoId }) => {
       <div className="flex flex-col md:flex-row gap-6">
         <div className="flex-1 min-w-0">
           <VideoSection videoId={videoId} />
+          <CommentsSection videoId={videoId} />
           <div className="xl:hidden block mt-4">
             <SuggestionsSection videoId={videoId} isManual />
           </div>
-          <CommentsSection videoId={videoId} />
         </div>
         <div className="hidden xl:block w-full xl:w-[380px] 2xl:w-[460px] shrink-1">
           <SuggestionsSection videoId={videoId} />
