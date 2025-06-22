@@ -30,7 +30,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { videoUpdateSchema } from "@/db/schema";
 import { TUpdateVideo } from "@/db/types";
 import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
-import { THUMBNAIL_PLACEHOLDER_URL } from "@/lib/constants";
+import { APP_URL, THUMBNAIL_PLACEHOLDER_URL } from "@/lib/constants";
 import { cn, snakeCaseToTitleCase } from "@/lib/utils";
 import VideoStatusBadge from "@/modules/studio/ui/components/studio-badge-status";
 import { ThumbnailUploadModal } from "@/modules/studio/ui/components/thumbnail-upload-modal";
@@ -215,9 +215,7 @@ const VideoSectionSuspense: React.FC<VideoSectionProps> = ({ videoId }) => {
   };
 
   // TODO: Change if deployed to services other than vercel
-  const url = `${
-    process.env.VERCEL_URL || "http://localhost:3000"
-  }/videos/${videoId}`;
+  const url = `${APP_URL || "http://localhost:3000"}/videos/${videoId}`;
 
   const renderCategoryList = () => {
     if (categories.isLoading) {

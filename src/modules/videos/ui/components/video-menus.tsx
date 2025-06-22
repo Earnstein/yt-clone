@@ -7,6 +7,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
+import { APP_URL } from "@/lib/constants";
 import {
   EllipsisVerticalIcon,
   ListPlusIcon,
@@ -35,9 +36,7 @@ export const VideoMenus: React.FC<VideoMenuProps> = ({
   });
 
   const onShare = () => {
-    const url = `${
-      process.env.VERCEL_URL || "http://localhost:3000"
-    }/videos/${videoId}`;
+    const url = `${APP_URL || "http://localhost:3000"}/videos/${videoId}`;
 
     copyToClipboard(url);
   };
