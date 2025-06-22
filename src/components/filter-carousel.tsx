@@ -19,9 +19,15 @@ interface Props {
     value: string;
     label: string;
   }[];
+  onSelect?: (value: string | null) => void;
 }
 
-export const FilterCarousel: React.FC<Props> = ({ value, isLoading, data }) => {
+export const FilterCarousel: React.FC<Props> = ({
+  value,
+  isLoading,
+  data,
+  onSelect,
+}) => {
   const [api, setApi] = useState<CarouselApi | null>(null);
   const [countState, setCountState] = useState({
     current: 0,
@@ -66,7 +72,7 @@ export const FilterCarousel: React.FC<Props> = ({ value, isLoading, data }) => {
       >
         <CarouselContent className="-ml-3">
           {!isLoading && (
-            <Link href="/">
+            <Link href={`/?categoryId=${value}`}>
               <CarouselItem className="pl-3 basis-auto">
                 <Badge
                   variant={value === null ? "default" : "secondary"}
@@ -87,7 +93,11 @@ export const FilterCarousel: React.FC<Props> = ({ value, isLoading, data }) => {
             ))}
           {!isLoading &&
             data.map((content) => (
-              <Link key={content.value} href={`/?categoryId=${content.value}`}>
+              <Link
+                key={content.value}
+                href={`/?categoryId=${content.value}`}
+                onClick={() => onSelect?.(content.value)}
+              >
                 <CarouselItem className="pl-3 basis-auto">
                   <Badge
                     variant={value === content.value ? "default" : "secondary"}
