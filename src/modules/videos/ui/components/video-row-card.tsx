@@ -44,7 +44,7 @@ interface VideoRowCardProps extends VariantProps<typeof videoRowCardVariants> {
 }
 
 export const VideoRowCardSkeleton = ({
-  size,
+  size = "default",
 }: VariantProps<typeof videoRowCardVariants>) => {
   return (
     <div className={cn(videoRowCardVariants({ size }))}>
@@ -81,7 +81,7 @@ export const VideoRowCardSkeleton = ({
 export const VideoRowCard: React.FC<VideoRowCardProps> = ({
   video,
   onRemove,
-  size,
+  size = "default",
 }) => {
   const memoizedViewsAndLikes = useMemo(() => {
     return {
