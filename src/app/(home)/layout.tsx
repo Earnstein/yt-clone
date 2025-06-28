@@ -1,4 +1,5 @@
 import { HomeLayout } from "@/modules/home/ui/layouts/home-layouts";
+export const dynamic = "force-dynamic";
 
 interface Props {
   children: React.ReactNode;
