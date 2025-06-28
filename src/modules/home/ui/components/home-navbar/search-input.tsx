@@ -7,10 +7,9 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
 const SearchInput = () => {
-  //TODO: Add search functionality
-  const [query, setQuery] = useState("");
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [query, setQuery] = useState(searchParams.get("query") || "");
 
   const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
