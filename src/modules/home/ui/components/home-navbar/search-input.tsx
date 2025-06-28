@@ -19,7 +19,9 @@ const SearchInput = () => {
 
     const url = new URL("/search", APP_URL);
     const newQuery = query.trim();
+
     url.searchParams.set("query", encodeURIComponent(newQuery));
+
     if (categoryId) {
       url.searchParams.set("categoryId", encodeURIComponent(categoryId));
     }
