@@ -17,12 +17,11 @@ const SearchInput = () => {
     const params = new URLSearchParams(searchParams);
 
     // TODO : remove later
-    console.log({ params });
+    console.log(params.toString(), query);
 
     const origin = APP_URL ? `https://${APP_URL}` : "http://localhost:3000";
     const url = new URL("/search", origin);
     const newQuery = query.trim();
-    console.log(url.searchParams.toString());
     url.searchParams.set("query", encodeURIComponent(newQuery));
 
     if (newQuery === "") {
