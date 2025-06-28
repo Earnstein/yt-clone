@@ -214,8 +214,7 @@ const VideoSectionSuspense: React.FC<VideoSectionProps> = ({ videoId }) => {
     updateVideoMutation.mutate(data);
   };
 
-  // TODO: Change if deployed to services other than vercel
-  const url = `${APP_URL || "http://localhost:3000"}/videos/${videoId}`;
+  const url = `${APP_URL}/videos/${videoId}`;
 
   const renderCategoryList = () => {
     if (categories.isLoading) {
