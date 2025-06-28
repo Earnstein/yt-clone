@@ -14,6 +14,10 @@ interface PageProps {
 const page: NextPage<PageProps> = async ({ searchParams }) => {
   const { query, categoryId } = await searchParams;
   void trpc.categories.getAll.prefetch();
+  void trpc.search.getSearchResults.prefetchInfinite({
+    query,
+    categoryId,
+  });
   return (
     <HydrateClient>
       <SearchView query={query} categoryId={categoryId} />
