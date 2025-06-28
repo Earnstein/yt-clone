@@ -9,7 +9,7 @@ interface Props {
 }
 
 const CategoriesSectionSkeleton = () => {
-  return <FilterCarousel isLoading={true} data={[]} />;
+  return <FilterCarousel isLoading={true} data={[]} onSelect={() => {}} />;
 };
 
 const CategoriesSectionSuspense: React.FC<Props> = ({ categoryId }) => {
