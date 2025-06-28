@@ -15,14 +15,14 @@ const SearchInput = () => {
   const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const params = new URLSearchParams(searchParams);
+    const categoryId = params.get("categoryId");
 
-    // TODO : remove later
-    console.log(params.toString(), query);
-
-    const origin = APP_URL ? `https://${APP_URL}` : "http://localhost:3000";
-    const url = new URL("/search", origin);
+    const url = new URL("/search", APP_URL);
     const newQuery = query.trim();
     url.searchParams.set("query", encodeURIComponent(newQuery));
+    if (categoryId) {
+      url.searchParams.set("categoryId", encodeURIComponent(categoryId));
+    }
 
     if (newQuery === "") {
       url.searchParams.delete("query");
