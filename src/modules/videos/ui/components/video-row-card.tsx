@@ -133,7 +133,7 @@ export const VideoRowCard: React.FC<VideoRowCardProps> = ({
                 </div>
                 <Tooltip>
                   <TooltipTrigger>
-                    <p className="text-xs text-muted-foreground w-fit line-clamp-2">
+                    <p className="text-xs text-muted-foreground w-fit line-clamp-2 text-pretty max-w-md text-start">
                       {video.description ?? "No description"}
                     </p>
                   </TooltipTrigger>
