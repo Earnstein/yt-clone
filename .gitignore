@@ -47,3 +47,6 @@ src/scripts/seed-categories.ts
 drizzle/
 
 .cursor
+
+keepit.txt
+bento-grid.tsx
