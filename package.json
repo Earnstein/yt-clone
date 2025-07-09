@@ -14,8 +14,10 @@
     "db:studio": "drizzle-kit studio",
     "db:push": "drizzle-kit push",
     "db:pull": "drizzle-kit pull",
-    "seeder": "bun run /src/scripts/seed-categories.ts",
-    "seeder:delete": "bun run /src/scripts/seed-categories.ts -d"
+    "seed:categories": "bun run /src/scripts/seed-categories.ts",
+    "seed:categories:delete": "bun run /src/scripts/seed-categories.ts -d",
+    "seed:movies": "bun run /src/scripts/seed-movies.ts",
+    "seed:movies:delete": "bun run /src/scripts/seed-movies.ts -d"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.11.2",

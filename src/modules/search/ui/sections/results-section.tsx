@@ -23,11 +23,11 @@ const ResultsSectionSkeleton = () => {
   return (
     <div>
       <div className="hidden flex-col gap-4 md:flex">
-        {Array.from({ length: 5 }).map((_, index) => (
+        {Array.from({ length: 2 }).map((_, index) => (
           <VideoRowCardSkeleton key={index} />
         ))}
       </div>
-      <div className="flex flex-col gap-y-10 gap-x-4">
+      <div className="flex flex-col gap-y-10 gap-x-4 md:hidden">
         {Array.from({ length: 5 }).map((_, index) => (
           <VideoGridCardSkeleton key={index} />
         ))}
