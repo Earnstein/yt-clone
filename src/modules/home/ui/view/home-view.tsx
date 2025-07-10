@@ -1,5 +1,5 @@
-import { CategoriesSection } from "../sections/categories-sections";
-import { HomeVideosSection } from "../sections/home-videos-sections";
+import { CategoriesSection } from "../sections/categories-section";
+import { HomeVideosSection } from "../sections/home-videos-section";
 
 interface Props {
   categoryId?: string;
