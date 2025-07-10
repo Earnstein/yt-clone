@@ -62,6 +62,7 @@ export const useSubscription = ({
       if (fromVideoId) {
         utils.videos.getOne.invalidate({ id: fromVideoId });
       }
+      utils.home.getSubscriptionsVideos.invalidate();
     },
   });
 
@@ -111,6 +112,7 @@ export const useSubscription = ({
       if (fromVideoId) {
         utils.videos.getOne.invalidate({ id: fromVideoId });
       }
+      utils.home.getSubscriptionsVideos.invalidate();
     },
   });
 
