@@ -13,6 +13,7 @@ import {
 import { trpc } from "@/trpc/client";
 import { Fragment, Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
+import { toast } from "sonner";
 
 const HistorySectionSkeleton = () => {
   return (
@@ -32,6 +33,29 @@ const HistorySectionSkeleton = () => {
 };
 
 const HistorySectionSuspense = () => {
+  const utils = trpc.useUtils();
+  const removeFromHistoryMutation = trpc.playlist.removeFromHistory.useMutation(
+    {
+      onMutate: () => {
+        toast.loading("Removing from history...");
+      },
+      onSuccess: ({ success }) => {
+        toast.dismiss();
+        if (!success) {
+          toast.error("Failed to remove from history");
+          return;
+        }
+
+        toast.success("Removed from history");
+        utils.playlist.getHistory.invalidate();
+      },
+      onError: () => {
+        toast.dismiss();
+        toast.error("Failed to remove from history");
+      },
+    }
+  );
+
   const [results, resultsQuery] =
     trpc.playlist.getHistory.useSuspenseInfiniteQuery(
       {
@@ -50,16 +74,31 @@ const HistorySectionSuspense = () => {
     );
   }
 
+  const handleRemoveFromHistory = (videoId: string) => {
+    removeFromHistoryMutation.mutate({ videoId });
+  };
+
   return (
     <Fragment>
       <div className="hidden flex-col gap-y-4 md:flex">
         {videos.map((video) => (
-          <VideoRowCard key={video.id} video={video} size="compact" />
+          <VideoRowCard
+            key={video.id}
+            video={video}
+            size="compact"
+            onRemove={() => handleRemoveFromHistory(video.id)}
+            isPending={removeFromHistoryMutation.isPending}
+          />
         ))}
       </div>
       <div className="flex flex-col gap-y-4 md:hidden">
         {videos.map((video) => (
-          <VideoGridCard key={video.id} video={video} />
+          <VideoGridCard
+            key={video.id}
+            video={video}
+            onRemove={() => handleRemoveFromHistory(video.id)}
+            isPending={removeFromHistoryMutation.isPending}
+          />
         ))}
       </div>
 
