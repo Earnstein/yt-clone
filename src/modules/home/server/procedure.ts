@@ -12,7 +12,7 @@ import {
   createTRPCRouter,
   protectedProcedure,
 } from "@/trpc/init";
-import { and, desc, eq, getTableColumns, inArray, lt, or } from "drizzle-orm";
+import { and, desc, eq, getTableColumns, lt, or } from "drizzle-orm";
 import { z } from "zod";
 
 export const homeRouter = createTRPCRouter({
@@ -182,14 +182,17 @@ export const homeRouter = createTRPCRouter({
       const { cursor, limit } = input;
       const { user } = ctx;
 
-      const userSubscriptions = await db
-        .select({
-          userId: subscriptions.creatorId,
-        })
-        .from(subscriptions)
-        .where(eq(subscriptions.viewerId, user.id));
+      const viewerSubscriptions = db.$with("viewer_subscriptions").as(
+        db
+          .select({
+            userId: subscriptions.creatorId,
+          })
+          .from(subscriptions)
+          .where(eq(subscriptions.viewerId, user.id))
+      );
 
       const data = await db
+        .with(viewerSubscriptions)
         .select({
           ...getTableColumns(videos),
           user: users,
@@ -211,13 +214,13 @@ export const homeRouter = createTRPCRouter({
         })
         .from(videos)
         .innerJoin(users, eq(videos.userId, users.id))
+        .innerJoin(
+          viewerSubscriptions,
+          eq(users.id, viewerSubscriptions.userId)
+        )
         .where(
           and(
             eq(videos.visibility, "public"),
-            inArray(
-              videos.userId,
-              userSubscriptions.map((s) => s.userId)
-            ),
             cursor
               ? or(
                   lt(videos.updatedAt, cursor.updatedAt),
