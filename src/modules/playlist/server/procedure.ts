@@ -100,14 +100,20 @@ export const playlistRouter = createTRPCRouter({
       const { videoId } = input;
       const { user } = ctx;
 
-      await db
+      const [deletedView] = await db
         .delete(videoViews)
         .where(
           and(eq(videoViews.videoId, videoId), eq(videoViews.userId, user.id))
-        );
+        )
+        .returning();
+
+      if (!deletedView) {
+        throw new Error("Video view not found in history");
+      }
 
       return {
         success: true,
+        deletedView,
       };
     }),
 });
