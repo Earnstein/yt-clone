@@ -50,7 +50,7 @@ export const StudioCreateModal = () => {
       title: "",
       description: "",
       categoryId: "",
-      visibility: "public",
+      visibility: "private",
     },
     resolver: zodResolver(createVideoSchema),
   });
@@ -60,6 +60,8 @@ export const StudioCreateModal = () => {
       toast.success("Video created successfully");
       form.reset();
       utils.studio.getAllVideos.invalidate();
+      utils.home.getTrendingVideos.invalidate();
+      utils.home.getHomeVideos.invalidate();
       setOpen(false);
     },
     onError: (error) => {
