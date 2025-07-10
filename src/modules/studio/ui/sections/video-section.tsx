@@ -142,11 +142,17 @@ const VideoSectionSuspense: React.FC<VideoSectionProps> = ({ videoId }) => {
   const [video] = trpc.studio.getVideoById.useSuspenseQuery({ id: videoId });
   const categories = trpc.categories.getAll.useQuery();
 
+  const invalidateVideos = () => {
+    utils.home.getTrendingVideos.invalidate();
+    utils.home.getHomeVideos.invalidate();
+    utils.studio.getAllVideos.invalidate();
+  };
+
   // Mutations
   const updateVideoMutation = trpc.videos.updateVideo.useMutation({
     onSuccess: () => {
       toast.success("Video updated successfully");
-      utils.studio.getAllVideos.invalidate();
+      invalidateVideos();
       utils.studio.getVideoById.invalidate({ id: videoId });
     },
     onError: (error) => {
@@ -161,7 +167,7 @@ const VideoSectionSuspense: React.FC<VideoSectionProps> = ({ videoId }) => {
     },
     onSuccess: () => {
       toast.dismiss();
-      utils.studio.getAllVideos.invalidate();
+      invalidateVideos();
       utils.studio.getVideoById.invalidate({ id: videoId });
       toast.success("Thumbnail updated successfully");
     },
@@ -177,7 +183,7 @@ const VideoSectionSuspense: React.FC<VideoSectionProps> = ({ videoId }) => {
       toast.loading(`Deleting ${video.title}....`);
     },
     onSuccess: (data) => {
-      utils.studio.getAllVideos.invalidate();
+      invalidateVideos();
       toast.dismiss();
       toast.success(data.message);
       router.push("/studio");
@@ -193,7 +199,7 @@ const VideoSectionSuspense: React.FC<VideoSectionProps> = ({ videoId }) => {
       toast.loading("Loading video...");
     },
     onSuccess: () => {
-      utils.studio.getAllVideos.invalidate();
+      invalidateVideos();
       toast.dismiss();
       toast.success("success");
     },
