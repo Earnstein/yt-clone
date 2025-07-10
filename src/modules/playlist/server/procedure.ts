@@ -90,4 +90,24 @@ export const playlistRouter = createTRPCRouter({
         nextCursor,
       };
     }),
+  removeFromHistory: protectedProcedure
+    .input(
+      z.object({
+        videoId: z.string(),
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      const { videoId } = input;
+      const { user } = ctx;
+
+      await db
+        .delete(videoViews)
+        .where(
+          and(eq(videoViews.videoId, videoId), eq(videoViews.userId, user.id))
+        );
+
+      return {
+        success: true,
+      };
+    }),
 });
