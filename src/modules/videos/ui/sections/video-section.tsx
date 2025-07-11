@@ -26,13 +26,11 @@ const VideoSectionSuspense: React.FC<VideoSectionProps> = ({ videoId }) => {
   const utils = trpc.useUtils();
   const [video] = trpc.videos.getOne.useSuspenseQuery({ id: videoId });
   const createView = trpc.videoViews.create.useMutation({
-    onSuccess: async () => {
-      await Promise.all([
-        utils.videos.getOne.invalidate({ id: videoId }),
-        utils.playlist.getHistory.invalidate(),
-        utils.home.getHomeVideos.invalidate(),
-        utils.home.getTrendingVideos.invalidate(),
-      ]);
+    onSuccess: () => {
+      utils.videos.getOne.invalidate({ id: videoId });
+      utils.playlist.getHistory.invalidate();
+      utils.home.getHomeVideos.invalidate();
+      utils.home.getTrendingVideos.invalidate();
     },
   });
   const handlePlay = () => {
