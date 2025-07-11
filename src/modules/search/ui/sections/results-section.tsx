@@ -35,7 +35,10 @@ const ResultsSectionSkeleton = () => {
   );
 };
 
-const ResultsSectionSuspense = ({ query, categoryId }: ResultsSectionProps) => {
+const ResultsSectionSuspense: React.FC<ResultsSectionProps> = ({
+  query,
+  categoryId,
+}) => {
   const [results, resultsQuery] =
     trpc.search.getSearchResults.useSuspenseInfiniteQuery(
       {
@@ -67,7 +70,10 @@ const ResultsSectionSuspense = ({ query, categoryId }: ResultsSectionProps) => {
   );
 };
 
-export const ResultsSection = ({ query, categoryId }: ResultsSectionProps) => {
+export const ResultsSection: React.FC<ResultsSectionProps> = ({
+  query,
+  categoryId,
+}) => {
   return (
     <Suspense
       fallback={<ResultsSectionSkeleton />}
