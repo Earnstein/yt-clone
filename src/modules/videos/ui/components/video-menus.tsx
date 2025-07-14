@@ -20,6 +20,7 @@ interface VideoMenuProps {
   videoId: string;
   variant?: ButtonProps["variant"];
   onRemove?: () => void;
+  isPending?: boolean;
 }
 
 // TODO: Add a playlist menu item
@@ -27,6 +28,7 @@ export const VideoMenus: React.FC<VideoMenuProps> = ({
   videoId,
   variant = "ghost",
   onRemove,
+  isPending,
 }) => {
   const { copyToClipboard } = useCopyToClipboard({
     timeout: 2000,
@@ -62,7 +64,7 @@ export const VideoMenus: React.FC<VideoMenuProps> = ({
         {onRemove && (
           <>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={onRemove}>
+            <DropdownMenuItem onClick={onRemove} disabled={isPending}>
               <Trash2Icon className="mr-2 size-4" />
               Remove
             </DropdownMenuItem>

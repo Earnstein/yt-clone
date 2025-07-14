@@ -6,6 +6,7 @@ import { VideoThumbnail, VideoThumbnailSkeleton } from "./video-thumbnail";
 interface VideoGridCardProps {
   video: TGetManyVideosOutput["items"][number];
   onRemove?: () => void;
+  isPending?: boolean;
 }
 
 export const VideoGridCardSkeleton = () => {
@@ -20,6 +21,7 @@ export const VideoGridCardSkeleton = () => {
 export const VideoGridCard: React.FC<VideoGridCardProps> = ({
   video,
   onRemove,
+  isPending,
 }) => {
   return (
     <div className="flex flex-col gap-2 w-full group">
@@ -32,7 +34,7 @@ export const VideoGridCard: React.FC<VideoGridCardProps> = ({
         />
       </Link>
 
-      <VideoInfo video={video} onRemove={onRemove} />
+      <VideoInfo video={video} onRemove={onRemove} isPending={isPending} />
     </div>
   );
 };

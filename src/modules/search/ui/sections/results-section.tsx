@@ -1,7 +1,6 @@
 "use client";
 
 import { InfiniteScroll } from "@/components/infinite-scroll";
-import { useIsMobile } from "@/hooks/use-mobile";
 import {
   VideoGridCard,
   VideoGridCardSkeleton,
@@ -36,8 +35,10 @@ const ResultsSectionSkeleton = () => {
   );
 };
 
-const ResultsSectionSuspense = ({ query, categoryId }: ResultsSectionProps) => {
-  const isMobile = useIsMobile();
+const ResultsSectionSuspense: React.FC<ResultsSectionProps> = ({
+  query,
+  categoryId,
+}) => {
   const [results, resultsQuery] =
     trpc.search.getSearchResults.useSuspenseInfiniteQuery(
       {
@@ -50,20 +51,16 @@ const ResultsSectionSuspense = ({ query, categoryId }: ResultsSectionProps) => {
   const videos = results.pages.flatMap((page) => page.items);
   return (
     <Fragment>
-      {isMobile ? (
-        <div className="flex flex-col gap-y-10 gap-x-4">
-          {videos.map((video) => (
-            <VideoGridCard key={video.id} video={video} />
-          ))}
-        </div>
-      ) : (
-        <div className="flex flex-col gap-4">
-          {videos.map((video) => (
-            <VideoRowCard key={video.id} video={video} />
-          ))}
-        </div>
-      )}
-
+      <div className="flex flex-col gap-y-10 gap-x-4 md:hidden">
+        {videos.map((video) => (
+          <VideoGridCard key={video.id} video={video} />
+        ))}
+      </div>
+      <div className="hidden flex-col gap-4 md:flex">
+        {videos.map((video) => (
+          <VideoRowCard key={video.id} video={video} />
+        ))}
+      </div>
       <InfiniteScroll
         hasNextPage={resultsQuery.hasNextPage}
         ifFetchingNextPage={resultsQuery.isFetchingNextPage}
@@ -73,7 +70,10 @@ const ResultsSectionSuspense = ({ query, categoryId }: ResultsSectionProps) => {
   );
 };
 
-export const ResultsSection = ({ query, categoryId }: ResultsSectionProps) => {
+export const ResultsSection: React.FC<ResultsSectionProps> = ({
+  query,
+  categoryId,
+}) => {
   return (
     <Suspense
       fallback={<ResultsSectionSkeleton />}

@@ -72,6 +72,7 @@ export const VideoReactions: React.FC<VideoReactionProps> = ({
     onSettled: () => {
       // Always refresh data when mutation completes
       utils.videos.getOne.invalidate({ id: videoId });
+      utils.playlist.getLiked.invalidate();
     },
   });
 

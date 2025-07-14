@@ -41,6 +41,7 @@ const thumbnailVariants = cva("relative flex-none", {
 interface VideoRowCardProps extends VariantProps<typeof videoRowCardVariants> {
   video: TGetManyVideosOutput["items"][number];
   onRemove?: () => void;
+  isPending?: boolean;
 }
 
 export const VideoRowCardSkeleton = ({
@@ -82,6 +83,7 @@ export const VideoRowCard: React.FC<VideoRowCardProps> = ({
   video,
   onRemove,
   size = "default",
+  isPending,
 }) => {
   const memoizedViewsAndLikes = useMemo(() => {
     return {
@@ -164,7 +166,11 @@ export const VideoRowCard: React.FC<VideoRowCardProps> = ({
           </Link>
 
           <div className="flex-none">
-            <VideoMenus videoId={video.id} />
+            <VideoMenus
+              videoId={video.id}
+              onRemove={onRemove}
+              isPending={isPending}
+            />
           </div>
         </div>
       </div>

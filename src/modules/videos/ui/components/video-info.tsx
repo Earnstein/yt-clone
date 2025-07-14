@@ -11,6 +11,7 @@ import { VideoMenus } from "./video-menus";
 interface VideoInfoProps {
   video: TGetManyVideosOutput["items"][number];
   onRemove?: () => void;
+  isPending?: boolean;
 }
 
 export const VideoInfoSkeleton = () => {
@@ -25,7 +26,11 @@ export const VideoInfoSkeleton = () => {
   );
 };
 
-export const VideoInfo: React.FC<VideoInfoProps> = ({ video, onRemove }) => {
+export const VideoInfo: React.FC<VideoInfoProps> = ({
+  video,
+  onRemove,
+  isPending,
+}) => {
   const memoizedValuess = useMemo(() => {
     return {
       compactViews: formatNumber(video.viewCount, { notation: "compact" }),
@@ -58,7 +63,11 @@ export const VideoInfo: React.FC<VideoInfoProps> = ({ video, onRemove }) => {
       </div>
 
       <div className="flex-shrink-0">
-        <VideoMenus videoId={video.id} onRemove={onRemove} />
+        <VideoMenus
+          videoId={video.id}
+          onRemove={onRemove}
+          isPending={isPending}
+        />
       </div>
     </div>
   );
