@@ -212,6 +212,39 @@ export const subscriptions = pgTable(
   ]
 );
 
+// Playlists schema
+export const playlists = pgTable("playlists", {
+  id: varchar("id", { length: 16 }).primaryKey(),
+  name: varchar("name", { length: 128 }).notNull(),
+  description: varchar("description", { length: 255 }),
+  userId: text("user_id")
+    .references(() => users.id, { onDelete: "cascade" })
+    .notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// Playlist items schema
+export const playlistVideos = pgTable(
+  "playlist_videos",
+  {
+    playlistId: varchar("playlist_id", { length: 16 })
+      .references(() => playlists.id, { onDelete: "cascade" })
+      .notNull(),
+    videoId: varchar("video_id", { length: 16 })
+      .references(() => videos.id, { onDelete: "cascade" })
+      .notNull(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  },
+  (t) => [
+    primaryKey({
+      name: "playlist_videos_pk",
+      columns: [t.playlistId, t.videoId],
+    }),
+  ]
+);
+
 /*
 Note: This is for application-level use only and doesn't affect database-level relations.
 It's useful for query like builders as in Prisma (e.g., video.findMany({ include: { user: true } }))
@@ -242,12 +275,19 @@ export const videoRelations = relations(videos, ({ one, many }) => ({
   user: one(users, {
     fields: [videos.userId],
     references: [users.id],
+    relationName: "videos_user_id_fk",
   }),
   category: one(categories, {
     fields: [videos.categoryId],
     references: [categories.id],
+    relationName: "videos_category_id_fk",
   }),
   views: many(videoViews),
+  reactions: many(videoReactions),
+  comments: many(comments),
+  playlistVideos: many(playlistVideos, {
+    relationName: "playlist_videos_video_id_fk",
+  }),
 }));
 
 export const userRelations = relations(users, ({ many }) => ({
@@ -338,6 +378,30 @@ export const commentReactionRelations = relations(
   })
 );
 
+export const playlistRelations = relations(playlists, ({ one, many }) => ({
+  playlistVideos: many(playlistVideos, {
+    relationName: "playlist_videos_playlist_id_fk",
+  }),
+  user: one(users, {
+    fields: [playlists.userId],
+    references: [users.id],
+    relationName: "playlists_user_id_fk",
+  }),
+}));
+
+export const playlistVideoRelations = relations(playlistVideos, ({ one }) => ({
+  playlist: one(playlists, {
+    fields: [playlistVideos.playlistId],
+    references: [playlists.id],
+    relationName: "playlist_videos_playlist_id_fk",
+  }),
+  video: one(videos, {
+    fields: [playlistVideos.videoId],
+    references: [videos.id],
+    relationName: "playlist_videos_video_id_fk",
+  }),
+}));
+
 // This helps generate zod schemas for the video table
 export const videoInsertSchema = createInsertSchema(videos);
 export const videoSelectSchema = createSelectSchema(videos);
@@ -358,3 +422,11 @@ export const subscriptionUpdateSchema = createUpdateSchema(subscriptions);
 export const commentInsertSchema = createInsertSchema(comments);
 export const commentSelectSchema = createSelectSchema(comments);
 export const commentUpdateSchema = createUpdateSchema(comments);
+
+export const playlistInsertSchema = createInsertSchema(playlists);
+export const playlistSelectSchema = createSelectSchema(playlists);
+export const playlistUpdateSchema = createUpdateSchema(playlists);
+
+export const playlistVideoInsertSchema = createInsertSchema(playlistVideos);
+export const playlistVideoSelectSchema = createSelectSchema(playlistVideos);
+export const playlistVideoUpdateSchema = createUpdateSchema(playlistVideos);
