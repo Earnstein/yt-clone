@@ -1,6 +1,7 @@
 import { db } from "@/db";
 import { videoViews } from "@/db/schema";
 import { createTRPCRouter, protectedProcedure } from "@/trpc/init";
+import { sql } from "drizzle-orm";
 import { z } from "zod";
 
 export const videoViewsRouter = createTRPCRouter({
@@ -15,7 +16,7 @@ export const videoViewsRouter = createTRPCRouter({
         .values({ userId: user.id, videoId: videoId })
         .onConflictDoUpdate({
           target: [videoViews.userId, videoViews.videoId],
-          set: { updatedAt: new Date() },
+          set: { updatedAt: sql`CURRENT_TIMESTAMP` },
         })
         .returning();
 
