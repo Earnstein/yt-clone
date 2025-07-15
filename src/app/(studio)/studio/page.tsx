@@ -7,6 +7,7 @@ const page = async () => {
   void trpc.studio.getAllVideos.prefetchInfinite({
     limit: DEFAULT_LIMIT,
   });
+  void trpc.categories.getAll.prefetch();
   return (
     <HydrateClient>
       <StudioView />
