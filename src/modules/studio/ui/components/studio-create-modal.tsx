@@ -208,10 +208,10 @@ const StudioCreateModalSuspense = () => {
 
 export const StudioCreateModal = () => {
   return (
-    <ErrorBoundary fallback={<div>Error</div>}>
-      <Suspense fallback={<CategoryListSkeleton />}>
+    <Suspense fallback={<CategoryListSkeleton />}>
+      <ErrorBoundary fallback={<div>Error</div>}>
         <StudioCreateModalSuspense />
-      </Suspense>
-    </ErrorBoundary>
+      </ErrorBoundary>
+    </Suspense>
   );
 };
