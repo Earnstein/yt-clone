@@ -1,7 +1,16 @@
 import { db } from "@/db";
-import { users, videoReactions, videos, videoViews } from "@/db/schema";
+import {
+  playlists,
+  playlistVideos,
+  users,
+  videoReactions,
+  videos,
+  videoViews,
+} from "@/db/schema";
 import { DEFAULT_LIMIT } from "@/lib/constants";
+import { generateUniqueId } from "@/lib/utils";
 import { createTRPCRouter, protectedProcedure } from "@/trpc/init";
+import { TRPCError } from "@trpc/server";
 import { and, desc, eq, getTableColumns, lt, or } from "drizzle-orm";
 import { z } from "zod";
 
@@ -236,6 +245,103 @@ export const playlistRouter = createTRPCRouter({
       return {
         success: true,
         deletedReaction,
+      };
+    }),
+
+  createPlaylist: protectedProcedure
+    .input(
+      z.object({
+        name: z.string(),
+        description: z.string().optional(),
+        visibility: z.enum(["public", "private"]).default("private"),
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      const { name, description, visibility } = input;
+      const { user } = ctx;
+
+      const [newPlaylist] = await db
+        .insert(playlists)
+        .values({
+          id: generateUniqueId("pl"),
+          name,
+          description,
+          visibility,
+          userId: user.id,
+        })
+        .returning();
+
+      if (!newPlaylist) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to create playlist",
+        });
+      }
+
+      return {
+        success: true,
+        playlist: newPlaylist,
+      };
+    }),
+
+  getPlaylists: protectedProcedure
+    .input(
+      z.object({
+        cursor: z
+          .object({
+            id: z.string(),
+            updatedAt: z.date(),
+          })
+          .nullish(),
+        limit: z.number().min(1).max(100).default(DEFAULT_LIMIT),
+      })
+    )
+    .query(async ({ input, ctx }) => {
+      const { cursor, limit } = input;
+      const { user } = ctx;
+
+      const data = await db
+        .select({
+          ...getTableColumns(playlists),
+          videoCount: db.$count(
+            playlistVideos,
+            eq(playlistVideos.playlistId, playlists.id)
+          ),
+          user: users,
+        })
+        .from(playlists)
+        .innerJoin(users, eq(playlists.userId, users.id))
+        .where(
+          and(
+            eq(playlists.userId, user.id),
+            cursor
+              ? or(
+                  lt(playlists.updatedAt, cursor.updatedAt),
+                  and(
+                    eq(playlists.updatedAt, cursor.updatedAt),
+                    lt(playlists.id, cursor.id)
+                  )
+                )
+              : undefined
+          )
+        )
+        .orderBy(desc(playlists.updatedAt), desc(playlists.id))
+        .limit(limit + 1);
+
+      const hasMore = data.length > limit;
+      const items = hasMore ? data.slice(0, -1) : data;
+
+      const lastItem = items[items.length - 1];
+      const nextCursor = hasMore
+        ? {
+            id: lastItem.id,
+            updatedAt: lastItem.updatedAt,
+          }
+        : null;
+
+      return {
+        items,
+        nextCursor,
       };
     }),
 });
