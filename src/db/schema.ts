@@ -8,7 +8,6 @@ import {
   primaryKey,
   text,
   timestamp,
-  uniqueIndex,
   varchar,
 } from "drizzle-orm/pg-core";
 import {
@@ -30,17 +29,13 @@ export const users = pgTable("users", {
 });
 
 // Categories schema
-export const categories = pgTable(
-  "categories",
-  {
-    id: varchar("id", { length: 16 }).primaryKey(),
-    name: varchar("name", { length: 32 }).notNull().unique(),
-    description: varchar("description", { length: 255 }),
-    createdAt: timestamp("created_at").notNull().defaultNow(),
-    updatedAt: timestamp("updated_at").notNull().defaultNow(),
-  },
-  (t) => [uniqueIndex("name_idx").on(t.name)]
-);
+export const categories = pgTable("categories", {
+  id: varchar("id", { length: 16 }).primaryKey(),
+  name: varchar("name", { length: 32 }).notNull().unique(),
+  description: varchar("description", { length: 255 }),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
 
 // Video visibility
 export const visibility = pgEnum("visibility", ["public", "private"]);
@@ -220,6 +215,7 @@ export const playlists = pgTable("playlists", {
   userId: text("user_id")
     .references(() => users.id, { onDelete: "cascade" })
     .notNull(),
+  visibility: visibility("visibility").notNull().default("private"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
