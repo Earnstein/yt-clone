@@ -41,7 +41,7 @@ yarn-error.log*
 next-env.d.ts
 
 # scripts
-src/scripts/seed-categories.ts
+src/scripts/
 
 # migrations
 drizzle/
