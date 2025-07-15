@@ -32,7 +32,7 @@ const TrendingVideosSectionSuspense = () => {
   const videos = results.pages.flatMap((page) => page.items);
   return (
     <Fragment>
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-y-10 gap-x-4 [@media(min-width:1920px)]:grid-cols-5">
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-y-10 gap-x-4 [@media(min-width:1920px)]:grid-cols-5 [@media(min-width:2200px)]:grid-cols-6">
         {videos.map((video) => (
           <VideoGridCard key={video.id} video={video} />
         ))}
