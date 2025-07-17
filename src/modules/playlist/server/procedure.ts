@@ -318,6 +318,14 @@ export const playlistRouter = createTRPCRouter({
             eq(playlistVideos.playlistId, playlists.id)
           ),
           user: users,
+          thumbNailUrl: sql<string | null>`(
+            SELECT v.thumbnail_url
+            FROM ${playlistVideos} pv
+            JOIN ${videos} v ON v.id = pv.video_id
+            WHERE pv.playlist_id = playlists.id
+            ORDER BY pv.updated_at DESC
+            LIMIT 1
+          )`,
         })
         .from(playlists)
         .innerJoin(users, eq(playlists.userId, users.id))
@@ -519,6 +527,75 @@ export const playlistRouter = createTRPCRouter({
       return {
         success: true,
         playlistVideo: deletedPlaylist,
+      };
+    }),
+
+  updatePlaylist: protectedProcedure
+    .input(
+      z
+        .object({
+          playlistId: z.string(),
+          name: z.string().optional(),
+          description: z.string().optional(),
+          visibility: z.enum(["public", "private"]).optional(),
+        })
+        .refine(
+          (data) => {
+            return Object.keys(data).length > 0;
+          },
+          {
+            message: "At least one field must be provided for update",
+          }
+        )
+    )
+    .mutation(async ({ input, ctx }) => {
+      const { playlistId, name, description, visibility } = input;
+      const { user } = ctx;
+
+      const [updatedPlaylist] = await db
+        .update(playlists)
+        .set({ name, description, visibility })
+        .where(and(eq(playlists.id, playlistId), eq(playlists.userId, user.id)))
+        .returning();
+
+      if (!updatedPlaylist) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Playlist not found or access denied",
+        });
+      }
+
+      return {
+        success: true,
+        playlist: updatedPlaylist,
+      };
+    }),
+
+  deletePlaylist: protectedProcedure
+    .input(
+      z.object({
+        playlistId: z.string(),
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      const { playlistId } = input;
+      const { user } = ctx;
+
+      const [deletedPlaylist] = await db
+        .delete(playlists)
+        .where(and(eq(playlists.id, playlistId), eq(playlists.userId, user.id)))
+        .returning();
+
+      if (!deletedPlaylist) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Playlist not found or access denied",
+        });
+      }
+
+      return {
+        success: true,
+        deletedPlaylist,
       };
     }),
 });
