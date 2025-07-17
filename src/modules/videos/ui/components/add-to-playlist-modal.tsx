@@ -52,9 +52,7 @@ export const AddToPlaylistModal: React.FC<AddToPlaylistModalProps> = ({
       });
     },
     onSettled: () => {
-      utils.playlist.getPlaylistsForVideos.invalidate({
-        videoId,
-      });
+      utils.playlist.getPlaylists.invalidate();
     },
     onError: (error) => {
       toast.error(error.message);
@@ -68,9 +66,7 @@ export const AddToPlaylistModal: React.FC<AddToPlaylistModalProps> = ({
       });
     },
     onSettled: () => {
-      utils.playlist.getPlaylistsForVideos.invalidate({
-        videoId,
-      });
+      utils.playlist.getPlaylists.invalidate();
     },
     onError: (error) => {
       toast.error(error.message);
