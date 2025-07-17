@@ -598,4 +598,36 @@ export const playlistRouter = createTRPCRouter({
         deletedPlaylist,
       };
     }),
+  getPlaylistById: protectedProcedure
+    .input(z.object({ playlistId: z.string() }))
+    .query(async ({ input, ctx }) => {
+      const { playlistId } = input;
+      const { user } = ctx;
+
+      const [playlist] = await db.execute<{
+        id: string;
+        name: string;
+        videos: { id: string; title: string; thumbnailUrl: string }[];
+      }>(
+        sql`
+   SELECT 
+    p.id,
+    p.name,
+    json_agg(
+      json_build_object(
+        'id', v.id,
+        'title', v.title,
+        'thumbnailUrl', v.thumbnail_url
+      )
+    ) AS videos
+  FROM ${playlists} p
+  LEFT JOIN ${playlistVideos} pv ON p.id = pv.playlist_id
+  LEFT JOIN ${videos} v ON pv.video_id = v.id
+  WHERE p.id = ${playlistId} AND p.user_id = ${user.id}
+  GROUP BY p.id, p.name
+`
+      );
+
+      return playlist;
+    }),
 });
