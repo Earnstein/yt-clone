@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 
 import { DEFAULT_LIMIT } from "@/lib/constants";
 import { cn } from "@/lib/utils";
-import { TPlaylists } from "@/modules/playlist/types";
 import { trpc } from "@/trpc/client";
 import {
   Loader2Icon,
@@ -21,10 +20,6 @@ interface AddToPlaylistModalProps {
   setOpen: (open: boolean) => void;
   videoId: string;
 }
-
-const getPlaylistName = (playlistId: string, playlists: TPlaylists) => {
-  return playlists.find((playlist) => playlist.id === playlistId)?.name;
-};
 
 export const AddToPlaylistModal: React.FC<AddToPlaylistModalProps> = ({
   open,
@@ -52,12 +47,6 @@ export const AddToPlaylistModal: React.FC<AddToPlaylistModalProps> = ({
 
   const addMutation = trpc.playlist.addToPlaylist.useMutation({
     onSuccess: () => {
-      toast.success(
-        `Added to ${getPlaylistName(
-          addMutation.variables!.playlistId,
-          playlists!.pages.flatMap((page) => page.items)
-        )}`
-      );
       utils.playlist.getPlaylistsForVideos.invalidate({
         videoId,
       });
@@ -74,12 +63,6 @@ export const AddToPlaylistModal: React.FC<AddToPlaylistModalProps> = ({
 
   const removeMutation = trpc.playlist.removeFromPlaylist.useMutation({
     onSuccess: () => {
-      toast.success(
-        `Removed from ${getPlaylistName(
-          removeMutation.variables!.playlistId,
-          playlists!.pages.flatMap((page) => page.items)
-        )}`
-      );
       utils.playlist.getPlaylistsForVideos.invalidate({
         videoId,
       });
@@ -93,6 +76,32 @@ export const AddToPlaylistModal: React.FC<AddToPlaylistModalProps> = ({
       toast.error(error.message);
     },
   });
+
+  const handleAddToPlaylist = (playlistId: string, playlistName: string) => {
+    addMutation.mutate(
+      { playlistId, videoId },
+      {
+        onSuccess: () => {
+          toast.success(`Added to ${playlistName}`);
+        },
+      }
+    );
+  };
+
+  const handleRemoveFromPlaylist = (
+    playlistId: string,
+    playlistName: string
+  ) => {
+    removeMutation.mutate(
+      { playlistId, videoId },
+      {
+        onSuccess: () => {
+          toast.success(`Removed from ${playlistName}`);
+        },
+      }
+    );
+  };
+
   return (
     <ResponsiveModal
       open={open}
@@ -122,15 +131,9 @@ export const AddToPlaylistModal: React.FC<AddToPlaylistModalProps> = ({
                 size="lg"
                 onClick={() => {
                   if (playlist.isInPlaylist) {
-                    removeMutation.mutate({
-                      playlistId: playlist.id,
-                      videoId,
-                    });
+                    handleRemoveFromPlaylist(playlist.id, playlist.name);
                   } else {
-                    addMutation.mutate({
-                      playlistId: playlist.id,
-                      videoId,
-                    });
+                    handleAddToPlaylist(playlist.id, playlist.name);
                   }
                 }}
                 disabled={
