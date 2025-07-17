@@ -13,6 +13,7 @@ interface Props {
   title: string;
   description?: string;
   onOpenChange: (open: boolean) => void;
+  className?: string;
 }
 
 export const ResponsiveModal: React.FC<Props> = ({
@@ -21,10 +22,11 @@ export const ResponsiveModal: React.FC<Props> = ({
   title,
   description,
   onOpenChange,
+  className,
 }) => {
   return (
     <Credenza open={open} onOpenChange={onOpenChange}>
-      <CredenzaContent>
+      <CredenzaContent className={className}>
         <CredenzaHeader>
           <CredenzaTitle>{title}</CredenzaTitle>
           <CredenzaDescription
