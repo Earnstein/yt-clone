@@ -11,7 +11,17 @@ import { DEFAULT_LIMIT } from "@/lib/constants";
 import { generateUniqueId } from "@/lib/utils";
 import { createTRPCRouter, protectedProcedure } from "@/trpc/init";
 import { TRPCError } from "@trpc/server";
-import { and, desc, eq, getTableColumns, lt, or } from "drizzle-orm";
+import {
+  and,
+  desc,
+  eq,
+  exists,
+  getTableColumns,
+  lt,
+  or,
+  SQL,
+  sql,
+} from "drizzle-orm";
 import { z } from "zod";
 
 export const playlistRouter = createTRPCRouter({
@@ -342,6 +352,180 @@ export const playlistRouter = createTRPCRouter({
       return {
         items,
         nextCursor,
+      };
+    }),
+
+  getPlaylistsForVideos: protectedProcedure
+    .input(
+      z.object({
+        videoId: z.string(),
+        cursor: z
+          .object({
+            id: z.string(),
+            updatedAt: z.date(),
+          })
+          .nullish(),
+        limit: z.number().min(1).max(100).default(DEFAULT_LIMIT),
+      })
+    )
+    .query(async ({ input, ctx }) => {
+      const { cursor, limit, videoId } = input;
+      const { user } = ctx;
+
+      const data = await db
+        .select({
+          ...getTableColumns(playlists),
+          videoCount: db.$count(
+            playlistVideos,
+            eq(playlistVideos.playlistId, playlists.id)
+          ),
+          user: users,
+          isInPlaylist: videoId
+            ? (exists(
+                db
+                  .select()
+                  .from(playlistVideos)
+                  .where(
+                    and(
+                      eq(playlistVideos.playlistId, playlists.id),
+                      eq(playlistVideos.videoId, videoId)
+                    )
+                  )
+              ) as SQL<boolean>)
+            : sql<boolean>`false`,
+        })
+        .from(playlists)
+        .innerJoin(users, eq(playlists.userId, users.id))
+        .where(
+          and(
+            eq(playlists.userId, user.id),
+            cursor
+              ? or(
+                  lt(playlists.updatedAt, cursor.updatedAt),
+                  and(
+                    eq(playlists.updatedAt, cursor.updatedAt),
+                    lt(playlists.id, cursor.id)
+                  )
+                )
+              : undefined
+          )
+        )
+        .orderBy(desc(playlists.updatedAt), desc(playlists.id))
+        .limit(limit + 1);
+
+      const hasMore = data.length > limit;
+      const items = hasMore ? data.slice(0, -1) : data;
+
+      const lastItem = items[items.length - 1];
+      const nextCursor = hasMore
+        ? {
+            id: lastItem.id,
+            updatedAt: lastItem.updatedAt,
+          }
+        : null;
+
+      return {
+        items,
+        nextCursor,
+      };
+    }),
+  addToPlaylist: protectedProcedure
+    .input(
+      z.object({
+        playlistId: z.string(),
+        videoId: z.string(),
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      const { playlistId, videoId } = input;
+      const { user } = ctx;
+
+      const [existingPlaylist] = await db
+        .select()
+        .from(playlists)
+        .where(
+          and(eq(playlists.id, playlistId), eq(playlists.userId, user.id))
+        );
+
+      if (!existingPlaylist) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Playlist not found",
+        });
+      }
+
+      if (existingPlaylist.userId !== user.id) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "You are not allowed to add videos to this playlist",
+        });
+      }
+
+      const [newPlaylist] = await db
+        .insert(playlistVideos)
+        .values({
+          playlistId,
+          videoId,
+        })
+        .returning();
+
+      if (!newPlaylist) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to create playlist",
+        });
+      }
+
+      return {
+        success: true,
+        playlistVideo: newPlaylist,
+      };
+    }),
+
+  removeFromPlaylist: protectedProcedure
+    .input(
+      z.object({
+        playlistId: z.string(),
+        videoId: z.string(),
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      const { playlistId, videoId } = input;
+      const { user } = ctx;
+
+      const [existingPlaylist] = await db
+        .select()
+        .from(playlists)
+        .where(
+          and(eq(playlists.id, playlistId), eq(playlists.userId, user.id))
+        );
+
+      if (!existingPlaylist) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Playlist not found",
+        });
+      }
+      const [deletedPlaylist] = await db
+        .delete(playlistVideos)
+        .where(
+          and(
+            eq(playlistVideos.playlistId, playlistId),
+            eq(playlistVideos.videoId, videoId)
+          )
+        )
+        .returning();
+
+      if (!deletedPlaylist) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to create playlist",
+        });
+      }
+
+      return {
+        success: true,
+        playlistVideo: deletedPlaylist,
       };
     }),
 });
