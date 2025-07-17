@@ -454,13 +454,6 @@ export const playlistRouter = createTRPCRouter({
         });
       }
 
-      if (existingPlaylist.userId !== user.id) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "You are not allowed to add videos to this playlist",
-        });
-      }
-
       const [newPlaylist] = await db
         .insert(playlistVideos)
         .values({
