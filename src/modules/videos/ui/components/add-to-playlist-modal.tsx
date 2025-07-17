@@ -107,7 +107,7 @@ export const AddToPlaylistModal: React.FC<AddToPlaylistModalProps> = ({
       open={open}
       title="Save to playlist"
       onOpenChange={setOpen}
-      className="w-full max-w-xs"
+      className="w-full md:max-w-xs"
     >
       <div>
         {isPlaylistsLoading && (
