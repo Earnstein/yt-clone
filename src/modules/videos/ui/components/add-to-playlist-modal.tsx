@@ -81,7 +81,7 @@ export const AddToPlaylistModal: React.FC<AddToPlaylistModalProps> = ({
     addMutation.mutate(
       { playlistId, videoId },
       {
-        onSuccess: () => {
+        onSettled: () => {
           toast.success(`Added to ${playlistName}`);
         },
       }
@@ -95,7 +95,7 @@ export const AddToPlaylistModal: React.FC<AddToPlaylistModalProps> = ({
     removeMutation.mutate(
       { playlistId, videoId },
       {
-        onSuccess: () => {
+        onSettled: () => {
           toast.success(`Removed from ${playlistName}`);
         },
       }
