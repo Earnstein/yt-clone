@@ -78,7 +78,7 @@ export const AddToPlaylistModal: React.FC<AddToPlaylistModalProps> = ({
   });
 
   const handleAddToPlaylist = (playlistId: string, playlistName: string) => {
-    addMutation.mutate(
+    return addMutation.mutate(
       { playlistId, videoId },
       {
         onSettled: () => {
@@ -92,7 +92,7 @@ export const AddToPlaylistModal: React.FC<AddToPlaylistModalProps> = ({
     playlistId: string,
     playlistName: string
   ) => {
-    removeMutation.mutate(
+    return removeMutation.mutate(
       { playlistId, videoId },
       {
         onSettled: () => {
