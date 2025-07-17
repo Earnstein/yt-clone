@@ -26,6 +26,8 @@ export const AddToPlaylistModal: React.FC<AddToPlaylistModalProps> = ({
   setOpen,
   videoId,
 }) => {
+  const utils = trpc.useUtils();
+
   const {
     data: playlists,
     isLoading: isPlaylistsLoading,
@@ -42,8 +44,6 @@ export const AddToPlaylistModal: React.FC<AddToPlaylistModalProps> = ({
       enabled: !!videoId && open,
     }
   );
-
-  const utils = trpc.useUtils();
 
   const addMutation = trpc.playlist.addToPlaylist.useMutation({
     onSuccess: () => {
@@ -102,6 +102,15 @@ export const AddToPlaylistModal: React.FC<AddToPlaylistModalProps> = ({
     );
   };
 
+  const isPlaylistPending = (playlistId: string) => {
+    return (
+      (addMutation.variables?.playlistId === playlistId &&
+        addMutation.isPending) ||
+      (removeMutation.variables?.playlistId === playlistId &&
+        removeMutation.isPending)
+    );
+  };
+
   return (
     <ResponsiveModal
       open={open}
@@ -136,12 +145,7 @@ export const AddToPlaylistModal: React.FC<AddToPlaylistModalProps> = ({
                     handleAddToPlaylist(playlist.id, playlist.name);
                   }
                 }}
-                disabled={
-                  (addMutation.variables?.playlistId === playlist.id &&
-                    addMutation.isPending) ||
-                  (removeMutation.variables?.playlistId === playlist.id &&
-                    removeMutation.isPending)
-                }
+                disabled={isPlaylistPending(playlist.id)}
               >
                 {playlist.isInPlaylist ? (
                   <SquareCheckIcon
