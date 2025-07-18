@@ -1,8 +1,8 @@
-import { adaptVideoToMediaItem } from "@/modules/shared/types/media";
+import { adaptVideoToMediaItem } from "@/components/shared/types/media";
 import {
   MediaInfo,
   MediaInfoSkeleton,
-} from "@/modules/shared/ui/components/media-info";
+} from "@/components/shared/ui/components/media-info";
 import { TGetManyVideosOutput } from "../../types";
 
 interface VideoInfoProps {

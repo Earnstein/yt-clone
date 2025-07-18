@@ -1,8 +1,8 @@
-import { adaptPlaylistToMediaItem } from "@/modules/shared/types/media";
+import { adaptPlaylistToMediaItem } from "@/components/shared/types/media";
 import {
   MediaInfo,
   MediaInfoSkeleton,
-} from "@/modules/shared/ui/components/media-info";
+} from "@/components/shared/ui/components/media-info";
 import { TGetOnePlaylistOutput } from "../../types";
 
 interface PlaylistInfoProps {

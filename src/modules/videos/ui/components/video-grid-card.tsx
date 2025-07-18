@@ -1,8 +1,8 @@
-import { adaptVideoToMediaItem } from "@/modules/shared/types/media";
+import { adaptVideoToMediaItem } from "@/components/shared/types/media";
 import {
   MediaGridCard,
   MediaGridCardSkeleton,
-} from "@/modules/shared/ui/components/media-grid-card";
+} from "@/components/shared/ui/components/media-grid-card";
 import { TGetManyVideosOutput } from "../../types";
 
 interface VideoGridCardProps {

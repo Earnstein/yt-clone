@@ -1,8 +1,8 @@
-import { adaptPlaylistToMediaItem } from "@/modules/shared/types/media";
+import { adaptPlaylistToMediaItem } from "@/components/shared/types/media";
 import {
   MediaRowCard,
   MediaRowCardSkeleton,
-} from "@/modules/shared/ui/components/media-row-card";
+} from "@/components/shared/ui/components/media-row-card";
 import { TGetOnePlaylistOutput } from "../../types";
 
 interface PlaylistRowCardProps {

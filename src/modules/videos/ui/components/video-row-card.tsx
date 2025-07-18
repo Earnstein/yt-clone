@@ -1,8 +1,8 @@
-import { adaptVideoToMediaItem } from "@/modules/shared/types/media";
+import { adaptVideoToMediaItem } from "@/components/shared/types/media";
 import {
   MediaRowCard,
   MediaRowCardSkeleton,
-} from "@/modules/shared/ui/components/media-row-card";
+} from "@/components/shared/ui/components/media-row-card";
 import { TGetManyVideosOutput } from "../../types";
 
 interface VideoRowCardProps {

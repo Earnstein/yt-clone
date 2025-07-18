@@ -1,8 +1,8 @@
-import { adaptPlaylistToMediaItem } from "@/modules/shared/types/media";
+import { adaptPlaylistToMediaItem } from "@/components/shared/types/media";
 import {
   MediaGridCard,
   MediaGridCardSkeleton,
-} from "@/modules/shared/ui/components/media-grid-card";
+} from "@/components/shared/ui/components/media-grid-card";
 import { TGetOnePlaylistOutput } from "../../types";
 
 interface PlaylistGridCardProps {
