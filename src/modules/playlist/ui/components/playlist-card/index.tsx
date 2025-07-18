@@ -26,6 +26,7 @@ export const PlaylistCard: React.FC<PlaylistCardProps> = ({ playlist }) => {
           imageUrl={playlist.thumbNailUrl || THUMBNAIL_PLACEHOLDER_URL}
           title={playlist.name}
           videoCount={playlist.videoCount}
+          playlistId={playlist.id}
         />
 
         <PlaylistInfo playlist={playlist} />
