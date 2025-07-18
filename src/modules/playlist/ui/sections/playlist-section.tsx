@@ -1,40 +1,80 @@
 "use client";
-
 import { InfiniteScroll } from "@/components/infinite-scroll";
 import { DEFAULT_LIMIT } from "@/lib/constants";
 import { trpc } from "@/trpc/client";
 import { Fragment, Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import {
-  PlaylistCard,
-  PlaylistCardSkeleton,
-} from "../components/playlist-card";
+  PlaylistGridCard,
+  PlaylistGridCardSkeleton,
+} from "../components/playlist-grid-card";
+import {
+  PlaylistRowCard,
+  PlaylistRowCardSkeleton,
+} from "../components/playlist-row-card";
 
+interface PlaylistSectionProps {
+  playlistId: string;
+}
 const PlaylistSectionSkeleton = () => {
   return (
-    <div className="grid sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-y-10 gap-x-4 sm:gap-x-6 [@media(min-width:1920px)]:grid-cols-5 [@media(min-width:2200px)]:grid-cols-6">
-      {Array.from({ length: 9 }).map((_, index) => (
-        <PlaylistCardSkeleton key={index} />
-      ))}
-    </div>
+    <Fragment>
+      <div className="hidden flex-col gap-y-4 md:flex">
+        {Array.from({ length: 4 }).map((_, index) => (
+          <PlaylistRowCardSkeleton key={index} size="compact" />
+        ))}
+      </div>
+      <div className="flex flex-col gap-y-4 md:hidden">
+        {Array.from({ length: 4 }).map((_, index) => (
+          <PlaylistGridCardSkeleton key={index} />
+        ))}
+      </div>
+    </Fragment>
   );
 };
-
-const PlaylistSectionSuspense = () => {
-  const [results, resultsQuery] =
-    trpc.playlist.getPlaylists.useSuspenseInfiniteQuery(
+const PlaylistSectionSuspense: React.FC<PlaylistSectionProps> = ({
+  playlistId,
+}) => {
+  const [playlist, resultsQuery] =
+    trpc.playlist.getPlaylistVideos.useSuspenseInfiniteQuery(
       {
+        playlistId,
         limit: DEFAULT_LIMIT,
       },
-      { getNextPageParam: (lastPage) => lastPage.nextCursor }
+      {
+        getNextPageParam: (lastPage) => lastPage.nextCursor,
+      }
     );
 
-  const playlists = results.pages.flatMap((page) => page.items);
+  const playlistVideos = playlist.pages.flatMap((page) => page.items);
+
   return (
     <Fragment>
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-y-10 gap-x-4 sm:gap-x-6 [@media(min-width:1920px)]:grid-cols-5 [@media(min-width:2200px)]:grid-cols-6">
-        {playlists.map((playlist) => (
-          <PlaylistCard key={playlist.id} playlist={playlist} />
+      <div className="flex flex-col gap-y-2">
+        <h1 className="text-2xl font-bold">{playlistVideos[0].name}</h1>
+        <p className="text-sm text-muted-foreground">
+          {playlistVideos[0].description ?? "Videos in your playlist"}
+        </p>
+      </div>
+      <div className="hidden flex-col gap-y-4 md:flex">
+        {playlistVideos.map((playlist) => (
+          <PlaylistRowCard
+            key={playlist.video.id}
+            playlist={playlist}
+            size="compact"
+            // onRemove={() => handleRemoveFromHistory(video.id)}
+            // isPending={removeFromHistoryMutation.isPending}
+          />
+        ))}
+      </div>
+      <div className="flex flex-col gap-y-4 md:hidden">
+        {playlistVideos.map((playlist) => (
+          <PlaylistGridCard
+            key={playlist.video.id}
+            playlist={playlist}
+            // onRemove={() => handleRemoveFromHistory(video.id)}
+            // isPending={removeFromHistoryMutation.isPending}
+          />
         ))}
       </div>
 
@@ -47,11 +87,13 @@ const PlaylistSectionSuspense = () => {
   );
 };
 
-export const PlaylistSection = () => {
+export const PlaylistSection: React.FC<PlaylistSectionProps> = ({
+  playlistId,
+}) => {
   return (
     <Suspense fallback={<PlaylistSectionSkeleton />}>
       <ErrorBoundary fallback={<div>Error</div>}>
-        <PlaylistSectionSuspense />
+        <PlaylistSectionSuspense playlistId={playlistId} />
       </ErrorBoundary>
     </Suspense>
   );
