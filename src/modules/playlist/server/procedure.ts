@@ -598,38 +598,6 @@ export const playlistRouter = createTRPCRouter({
         deletedPlaylist,
       };
     }),
-  getPlaylistById: protectedProcedure
-    .input(z.object({ playlistId: z.string() }))
-    .query(async ({ input, ctx }) => {
-      const { playlistId } = input;
-      const { user } = ctx;
-
-      const [playlist] = await db.execute<{
-        id: string;
-        name: string;
-        videos: { id: string; title: string; thumbnailUrl: string }[];
-      }>(
-        sql`
-   SELECT 
-    p.id,
-    p.name,
-    json_agg(
-      json_build_object(
-        'id', v.id,
-        'title', v.title,
-        'thumbnailUrl', v.thumbnail_url
-      )
-    ) AS videos
-  FROM ${playlists} p
-  LEFT JOIN ${playlistVideos} pv ON p.id = pv.playlist_id
-  LEFT JOIN ${videos} v ON pv.video_id = v.id
-  WHERE p.id = ${playlistId} AND p.user_id = ${user.id}
-  GROUP BY p.id, p.name
-`
-      );
-
-      return playlist;
-    }),
 
   getPlaylistVideos: protectedProcedure
     .input(
@@ -648,27 +616,20 @@ export const playlistRouter = createTRPCRouter({
       const { cursor, limit, playlistId } = input;
       const { user } = ctx;
 
-      const playlistWithVideos = db.$with("playlist_videos").as(
-        db
-          .select({
-            videoId: playlistVideos.videoId,
-            ...getTableColumns(playlists),
-          })
-          .from(playlistVideos)
-          .innerJoin(playlists, eq(playlistVideos.playlistId, playlists.id))
-          .where(
-            and(
-              eq(playlistVideos.playlistId, playlistId),
-              eq(playlists.userId, user.id)
-            )
-          )
-      );
-
       const data = await db
-        .with(playlistWithVideos)
         .select({
-          ...getTableColumns(videos),
+          // Playlist data first (primary focus)
+          ...getTableColumns(playlists),
+
+          // Video data (secondary)
+          video: {
+            ...getTableColumns(videos),
+          },
+
+          // Video owner/creator data
           user: users,
+
+          // Video engagement metrics
           viewCount: db.$count(videoViews, eq(videoViews.videoId, videos.id)),
           likeCount: db.$count(
             videoReactions,
@@ -684,31 +645,30 @@ export const playlistRouter = createTRPCRouter({
               eq(videoReactions.type, "dislike")
             )
           ),
-          playlistName: playlistWithVideos.name,
-          playlistDescription: playlistWithVideos.description,
-          playlistVisibility: playlistWithVideos.visibility,
+
+          // Playlist-video relationship metadata
+          addedToPlaylistAt: playlistVideos.createdAt,
         })
-        .from(videos)
-        .innerJoin(users, eq(videos.userId, users.id))
-        .innerJoin(
-          playlistWithVideos,
-          eq(videos.id, playlistWithVideos.videoId)
-        )
+        .from(playlists)
+        .innerJoin(playlistVideos, eq(playlists.id, playlistVideos.playlistId))
+        .innerJoin(videos, eq(playlistVideos.videoId, videos.id))
+        .innerJoin(users, eq(videos.userId, users.id)) // users is the video creator
         .where(
           and(
-            eq(videos.visibility, "public"),
+            eq(playlists.id, playlistId),
+            eq(playlists.userId, user.id), // Ensure user owns the playlist
             cursor
               ? or(
-                  lt(videos.updatedAt, cursor.updatedAt),
+                  lt(playlistVideos.updatedAt, cursor.updatedAt),
                   and(
-                    eq(videos.updatedAt, cursor.updatedAt),
+                    eq(playlistVideos.updatedAt, cursor.updatedAt),
                     lt(videos.id, cursor.id)
                   )
                 )
               : undefined
           )
         )
-        .orderBy(desc(videos.updatedAt), desc(videos.id))
+        .orderBy(desc(playlistVideos.updatedAt), desc(videos.id)) // Order by when added to playlist
         .limit(limit + 1);
 
       const hasMore = data.length > limit;
@@ -717,8 +677,8 @@ export const playlistRouter = createTRPCRouter({
       const lastItem = items[items.length - 1];
       const nextCursor = hasMore
         ? {
-            id: lastItem.id,
-            updatedAt: lastItem.updatedAt,
+            id: lastItem.video.id,
+            updatedAt: lastItem.addedToPlaylistAt,
           }
         : null;
 
