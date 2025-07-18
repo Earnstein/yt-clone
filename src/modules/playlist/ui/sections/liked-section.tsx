@@ -34,26 +34,49 @@ const LikedSectionSkeleton = () => {
 
 const LikedSectionSuspense = () => {
   const utils = trpc.useUtils();
+
+  const [results, resultsQuery] =
+    trpc.playlist.getLiked.useSuspenseInfiniteQuery(
+      {
+        limit: DEFAULT_LIMIT,
+      },
+      { getNextPageParam: (lastPage) => lastPage.nextCursor }
+    );
+
   const removeFromLiked = trpc.playlist.removeFromLiked.useMutation({
     onMutate: async ({ videoId }) => {
-      await utils.videos.getOne.cancel({ id: videoId });
-      const prevData = utils.videos.getOne.getData({ id: videoId });
+      //cancel outgoing request
+      await utils.playlist.getLiked.cancel();
+
+      // get the playlist items
+      const liked = utils.playlist.getLiked.getInfiniteData({
+        limit: DEFAULT_LIMIT,
+      });
+
+      const previousLiked = liked?.pages.flatMap((page) => page.items);
+
+      //if the playlist is not found, return the previous playlist items
+      if (!previousLiked) {
+        return { previousLiked };
+      }
+
+      const deletedLiked = previousLiked.filter((item) => item.id !== videoId);
       utils.playlist.getLiked.setInfiniteData(
         {
           limit: DEFAULT_LIMIT,
         },
-        (old) => {
-          if (!old) return old;
-          return {
-            ...old,
-            pages: old.pages.map((page) => ({
-              ...page,
-              items: page.items.filter((item) => item.id !== videoId),
-            })),
-          };
+        {
+          pages: [
+            {
+              items: deletedLiked,
+              nextCursor: liked?.pages[0]?.nextCursor ?? null,
+            },
+          ],
+          pageParams: [null],
         }
       );
-      return { prevData };
+
+      return { previousLiked };
     },
     onSuccess: ({ success }) => {
       toast.dismiss();
@@ -65,19 +88,27 @@ const LikedSectionSuspense = () => {
       toast.success("Removed");
       utils.playlist.getHistory.invalidate();
     },
-    onError: () => {
+    onError: (error, _, context) => {
       toast.dismiss();
-      toast.error("Failed to remove video");
+      if (context?.previousLiked) {
+        utils.playlist.getLiked.setInfiniteData(
+          {
+            limit: DEFAULT_LIMIT,
+          },
+          {
+            pages: [
+              {
+                items: context.previousLiked,
+                nextCursor: results.pages[0]?.nextCursor ?? null,
+              },
+            ],
+            pageParams: [null],
+          }
+        );
+      }
+      toast.error(error.message || "Failed to remove from liked");
     },
   });
-
-  const [results, resultsQuery] =
-    trpc.playlist.getLiked.useSuspenseInfiniteQuery(
-      {
-        limit: DEFAULT_LIMIT,
-      },
-      { getNextPageParam: (lastPage) => lastPage.nextCursor }
-    );
 
   const videos = results.pages.flatMap((page) => page.items);
 

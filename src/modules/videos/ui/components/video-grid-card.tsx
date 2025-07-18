@@ -1,7 +1,9 @@
-import Link from "next/link";
+import { adaptVideoToMediaItem } from "@/components/shared/types/media";
+import {
+  MediaGridCard,
+  MediaGridCardSkeleton,
+} from "@/components/shared/ui/components/media-grid-card";
 import { TGetManyVideosOutput } from "../../types";
-import { VideoInfo, VideoInfoSkeleton } from "./video-info";
-import { VideoThumbnail, VideoThumbnailSkeleton } from "./video-thumbnail";
 
 interface VideoGridCardProps {
   video: TGetManyVideosOutput["items"][number];
@@ -9,32 +11,20 @@ interface VideoGridCardProps {
   isPending?: boolean;
 }
 
+// Wrapper skeleton component for backwards compatibility
 export const VideoGridCardSkeleton = () => {
-  return (
-    <div className="flex flex-col gap-2 w-full">
-      <VideoThumbnailSkeleton />
-      <VideoInfoSkeleton />
-    </div>
-  );
+  return <MediaGridCardSkeleton />;
 };
 
+// Wrapper component that adapts video data to unified interface
 export const VideoGridCard: React.FC<VideoGridCardProps> = ({
   video,
   onRemove,
   isPending,
 }) => {
-  return (
-    <div className="flex flex-col gap-2 w-full group">
-      <Link href={`/videos/${video.id}`}>
-        <VideoThumbnail
-          thumbnailUrl={video.thumbnailUrl}
-          title={video.title}
-          duration={video.duration}
-          previewUrl={video.previewUrl}
-        />
-      </Link>
+  const mediaItem = adaptVideoToMediaItem(video);
 
-      <VideoInfo video={video} onRemove={onRemove} isPending={isPending} />
-    </div>
+  return (
+    <MediaGridCard item={mediaItem} onRemove={onRemove} isPending={isPending} />
   );
 };

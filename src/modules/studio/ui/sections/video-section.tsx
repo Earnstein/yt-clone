@@ -140,7 +140,7 @@ const VideoSectionSuspense: React.FC<VideoSectionProps> = ({ videoId }) => {
 
   // Queries
   const [video] = trpc.studio.getVideoById.useSuspenseQuery({ id: videoId });
-  const categories = trpc.categories.getAll.useQuery();
+  const [categories] = trpc.categories.getAll.useSuspenseQuery();
 
   const invalidateVideos = () => {
     utils.home.getTrendingVideos.invalidate();
@@ -222,44 +222,6 @@ const VideoSectionSuspense: React.FC<VideoSectionProps> = ({ videoId }) => {
 
   const url = `${APP_URL}/videos/${videoId}`;
 
-  const renderCategoryList = () => {
-    if (categories.isLoading) {
-      return (
-        <div className="space-y-2">
-          {[...Array(4)].map((_, i) => (
-            <Skeleton key={i} className="w-full h-8 rounded-none" />
-          ))}
-        </div>
-      );
-    }
-
-    if (categories.isError) {
-      return (
-        <div className="space-y-1 border-b border-neutral-200 text-xs text-muted-foreground">
-          <p className="text-body-2">Error loading categories</p>
-          <p className="text-body-2 text-destructive">
-            {categories.error.data?.httpStatus}: {categories.error.message}
-          </p>
-        </div>
-      );
-    }
-
-    if (!categories?.data?.length) {
-      return (
-        <div className="space-y-1 border-b border-neutral-200">
-          <SelectItem value="none" disabled>
-            No categories available
-          </SelectItem>
-        </div>
-      );
-    }
-
-    return categories.data.map((category) => (
-      <SelectItem key={category.id} value={category.id}>
-        <span className="text-body-2">{category.name}</span>
-      </SelectItem>
-    ));
-  };
   return (
     <>
       <ThumbnailUploadModal
@@ -445,7 +407,13 @@ const VideoSectionSuspense: React.FC<VideoSectionProps> = ({ videoId }) => {
                       </FormControl>
                       <SelectContent className="relative">
                         <div className=" overflow-x-hidden overflow-y-auto">
-                          {renderCategoryList()}
+                          {categories.map((category) => (
+                            <SelectItem key={category.id} value={category.id}>
+                              <span className="text-body-2">
+                                {category.name}
+                              </span>
+                            </SelectItem>
+                          ))}
                         </div>
                       </SelectContent>
                       <FormMessage />

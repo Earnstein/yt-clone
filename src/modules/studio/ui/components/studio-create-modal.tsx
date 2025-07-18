@@ -23,7 +23,8 @@ import { trpc } from "@/trpc/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PlusIcon } from "lucide-react";
 import { useParams, usePathname } from "next/navigation";
-import { useState } from "react";
+import { Suspense, useState } from "react";
+import { ErrorBoundary } from "react-error-boundary";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -40,10 +41,19 @@ const createVideoSchema = z.object({
 
 type TCreateVideo = z.infer<typeof createVideoSchema>;
 
-export const StudioCreateModal = () => {
+const CategoryListSkeleton = () => (
+  <div className="space-y-2">
+    {Array.from({ length: 4 }).map((_, i) => (
+      <Skeleton key={i} className="w-full h-8 rounded-none" />
+    ))}
+  </div>
+);
+
+const StudioCreateModalSuspense = () => {
   const pathname = usePathname();
   const { videoId } = useParams<{ videoId: string }>();
   const [open, setOpen] = useState(false);
+  const [categories] = trpc.categories.getAll.useSuspenseQuery();
 
   const form = useForm<TCreateVideo>({
     defaultValues: {
@@ -68,47 +78,6 @@ export const StudioCreateModal = () => {
       toast.error(error.message);
     },
   });
-
-  const categories = trpc.categories.getAll.useQuery();
-
-  const renderCategoryList = () => {
-    if (categories.isLoading) {
-      return (
-        <div className="space-y-2">
-          {[...Array(4)].map((_, i) => (
-            <Skeleton key={i} className="w-full h-8 rounded-none" />
-          ))}
-        </div>
-      );
-    }
-
-    if (categories.isError) {
-      return (
-        <div className="space-y-1 border-b border-neutral-200 text-xs text-muted-foreground">
-          <p className="text-body-2">Error loading categories</p>
-          <p className="text-body-2 text-destructive">
-            {categories.error.data?.httpStatus}: {categories.error.message}
-          </p>
-        </div>
-      );
-    }
-
-    if (!categories?.data?.length) {
-      return (
-        <div className="space-y-1 border-b border-neutral-200">
-          <SelectItem value="none" disabled>
-            No categories available
-          </SelectItem>
-        </div>
-      );
-    }
-
-    return categories.data.map((category) => (
-      <SelectItem key={category.id} value={category.id}>
-        <span className="text-body-2">{category.name}</span>
-      </SelectItem>
-    ));
-  };
 
   const handleSubmit = (data: TCreateVideo) => {
     mutation.mutate(data);
@@ -171,7 +140,11 @@ export const StudioCreateModal = () => {
                     </FormControl>
                     <SelectContent className="relative">
                       <div className=" overflow-x-hidden overflow-y-auto">
-                        {renderCategoryList()}
+                        {categories.map((category) => (
+                          <SelectItem key={category.id} value={category.id}>
+                            <span className="text-body-2">{category.name}</span>
+                          </SelectItem>
+                        ))}
                       </div>
                     </SelectContent>
                     <FormMessage />
@@ -230,5 +203,15 @@ export const StudioCreateModal = () => {
         </>
       )}
     </>
+  );
+};
+
+export const StudioCreateModal = () => {
+  return (
+    <Suspense fallback={<CategoryListSkeleton />}>
+      <ErrorBoundary fallback={<div>Error</div>}>
+        <StudioCreateModalSuspense />
+      </ErrorBoundary>
+    </Suspense>
   );
 };

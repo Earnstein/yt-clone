@@ -1,18 +1,18 @@
 import { DEFAULT_LIMIT } from "@/lib/constants";
-import { StudioView } from "@/modules/studio/ui/views/studio-view";
+import { PlaylistsView } from "@/modules/playlist/ui/views/playlists-view";
 import { HydrateClient, trpc } from "@/trpc/server";
+
 export const dynamic = "force-dynamic";
 
-const page = async () => {
-  void trpc.studio.getAllVideos.prefetchInfinite({
+const Page = () => {
+  void trpc.playlist.getPlaylists.prefetchInfinite({
     limit: DEFAULT_LIMIT,
   });
-  void trpc.categories.getAll.prefetch();
   return (
     <HydrateClient>
-      <StudioView />
+      <PlaylistsView />
     </HydrateClient>
   );
 };
 
-export default page;
+export default Page;
