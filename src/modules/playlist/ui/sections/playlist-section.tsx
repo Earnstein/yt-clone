@@ -135,6 +135,16 @@ const PlaylistSectionSuspense: React.FC<PlaylistSectionProps> = ({
     );
   };
 
+  if (playlistVideos.length === 0) {
+    return (
+      <div className="grid h-full place-items-center">
+        <p className="text-sm text-muted-foreground h-full">
+          No videos in playlist
+        </p>
+      </div>
+    );
+  }
+
   return (
     <Fragment>
       <div className="flex flex-col gap-y-2">

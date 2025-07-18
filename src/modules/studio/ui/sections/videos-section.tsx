@@ -147,9 +147,15 @@ const VideoSectionSuspense = () => {
                       " "
                     )}
                   </TableCell>
-                  <TableCell className="text-right">views</TableCell>
-                  <TableCell className="text-right">comments</TableCell>
-                  <TableCell className="text-right">likes</TableCell>
+                  <TableCell className="text-right">
+                    {video.viewsCount}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    {video.commentsCount}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    {video.likesCount}
+                  </TableCell>
                   <TableCell className="pr-6 text-right">
                     <StudioUploadVideoModal videoId={video.id} />
                   </TableCell>
