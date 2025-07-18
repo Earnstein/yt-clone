@@ -654,7 +654,13 @@ export const playlistRouter = createTRPCRouter({
             videoId: playlistVideos.videoId,
           })
           .from(playlistVideos)
-          .where(eq(playlistVideos.playlistId, playlistId))
+          .innerJoin(playlists, eq(playlistVideos.playlistId, playlists.id))
+          .where(
+            and(
+              eq(playlistVideos.playlistId, playlistId),
+              eq(playlists.userId, user.id)
+            )
+          )
       );
 
       const data = await db
