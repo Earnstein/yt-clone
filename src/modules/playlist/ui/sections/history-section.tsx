@@ -34,10 +34,52 @@ const HistorySectionSkeleton = () => {
 
 const HistorySectionSuspense = () => {
   const utils = trpc.useUtils();
+
+  const [results, resultsQuery] =
+    trpc.playlist.getHistory.useSuspenseInfiniteQuery(
+      {
+        limit: DEFAULT_LIMIT,
+      },
+      { getNextPageParam: (lastPage) => lastPage.nextCursor }
+    );
+
   const removeFromHistoryMutation = trpc.playlist.removeFromHistory.useMutation(
     {
-      onMutate: () => {
-        toast.loading("Removing from history...");
+      onMutate: async ({ videoId }) => {
+        //cancel outgoing request
+        await utils.playlist.getHistory.cancel();
+
+        // get the playlist items
+        const history = utils.playlist.getHistory.getInfiniteData({
+          limit: DEFAULT_LIMIT,
+        });
+
+        const previousHistory = history?.pages.flatMap((page) => page.items);
+
+        //if the playlist is not found, return the previous playlist items
+        if (!previousHistory) {
+          return { previousHistory };
+        }
+
+        const deletedHistory = previousHistory.filter(
+          (item) => item.id !== videoId
+        );
+        utils.playlist.getHistory.setInfiniteData(
+          {
+            limit: DEFAULT_LIMIT,
+          },
+          {
+            pages: [
+              {
+                items: deletedHistory,
+                nextCursor: history?.pages[0]?.nextCursor ?? null,
+              },
+            ],
+            pageParams: [null],
+          }
+        );
+
+        return { previousHistory };
       },
       onSuccess: ({ success }) => {
         toast.dismiss();
@@ -49,21 +91,28 @@ const HistorySectionSuspense = () => {
         toast.success("Removed from history");
         utils.playlist.getHistory.invalidate();
       },
-      onError: () => {
+      onError: (error, _, context) => {
         toast.dismiss();
-        toast.error("Failed to remove from history");
+        if (context?.previousHistory) {
+          utils.playlist.getHistory.setInfiniteData(
+            {
+              limit: DEFAULT_LIMIT,
+            },
+            {
+              pages: [
+                {
+                  items: context.previousHistory,
+                  nextCursor: results.pages[0]?.nextCursor ?? null,
+                },
+              ],
+              pageParams: [null],
+            }
+          );
+        }
+        toast.error(error.message || "Failed to remove from history");
       },
     }
   );
-
-  const [results, resultsQuery] =
-    trpc.playlist.getHistory.useSuspenseInfiniteQuery(
-      {
-        limit: DEFAULT_LIMIT,
-      },
-      { getNextPageParam: (lastPage) => lastPage.nextCursor }
-    );
-
   const videos = results.pages.flatMap((page) => page.items);
 
   if (videos.length === 0) {

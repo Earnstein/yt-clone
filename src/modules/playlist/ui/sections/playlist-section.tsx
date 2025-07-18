@@ -37,6 +37,18 @@ const PlaylistSectionSuspense: React.FC<PlaylistSectionProps> = ({
   playlistId,
 }) => {
   const utils = trpc.useUtils();
+
+  const [playlist, resultsQuery] =
+    trpc.playlist.getPlaylistVideos.useSuspenseInfiniteQuery(
+      {
+        playlistId,
+        limit: DEFAULT_LIMIT,
+      },
+      {
+        getNextPageParam: (lastPage) => lastPage.nextCursor,
+      }
+    );
+
   const removeFromPlaylistMutation =
     trpc.playlist.removeFromPlaylist.useMutation({
       onMutate: async ({ playlistId, videoId }) => {
@@ -102,16 +114,6 @@ const PlaylistSectionSuspense: React.FC<PlaylistSectionProps> = ({
         toast.error(error.message || "Failed to remove video from playlist");
       },
     });
-  const [playlist, resultsQuery] =
-    trpc.playlist.getPlaylistVideos.useSuspenseInfiniteQuery(
-      {
-        playlistId,
-        limit: DEFAULT_LIMIT,
-      },
-      {
-        getNextPageParam: (lastPage) => lastPage.nextCursor,
-      }
-    );
 
   const playlistVideos = playlist.pages.flatMap((page) => page.items);
   const handleRemoveFromPlaylist = (
