@@ -55,6 +55,7 @@ const PlaylistSectionSuspense: React.FC<PlaylistSectionProps> = ({
         if (!previousPlaylist) {
           return { previousPlaylist };
         }
+
         const deletedPlaylist = previousPlaylist.filter(
           (item) => item.video.id !== videoId
         );
@@ -73,7 +74,7 @@ const PlaylistSectionSuspense: React.FC<PlaylistSectionProps> = ({
             pageParams: [null],
           }
         );
-        //return the previous playlist items
+
         return { previousPlaylist };
       },
       onSuccess: () => {
