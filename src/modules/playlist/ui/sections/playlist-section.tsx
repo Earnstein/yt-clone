@@ -4,6 +4,7 @@ import { DEFAULT_LIMIT } from "@/lib/constants";
 import { trpc } from "@/trpc/client";
 import { Fragment, Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
+import { toast } from "sonner";
 import {
   PlaylistGridCard,
   PlaylistGridCardSkeleton,
@@ -35,6 +36,71 @@ const PlaylistSectionSkeleton = () => {
 const PlaylistSectionSuspense: React.FC<PlaylistSectionProps> = ({
   playlistId,
 }) => {
+  const utils = trpc.useUtils();
+  const removeFromPlaylistMutation =
+    trpc.playlist.removeFromPlaylist.useMutation({
+      onMutate: async ({ playlistId, videoId }) => {
+        //cancel outgoing request
+        await utils.playlist.getPlaylistVideos.cancel();
+
+        // get the playlist items
+        const playlist = utils.playlist.getPlaylistVideos.getInfiniteData({
+          playlistId,
+          limit: DEFAULT_LIMIT,
+        });
+
+        const previousPlaylist = playlist?.pages.flatMap((page) => page.items);
+
+        //if the playlist is not found, return the previous playlist items
+        if (!previousPlaylist) {
+          return { previousPlaylist };
+        }
+        const deletedPlaylist = previousPlaylist.filter(
+          (item) => item.video.id !== videoId
+        );
+        utils.playlist.getPlaylistVideos.setInfiniteData(
+          {
+            playlistId,
+            limit: DEFAULT_LIMIT,
+          },
+          {
+            pages: [
+              {
+                items: deletedPlaylist,
+                nextCursor: playlist?.pages[0]?.nextCursor ?? null,
+              },
+            ],
+            pageParams: [null],
+          }
+        );
+        //return the previous playlist items
+        return { previousPlaylist };
+      },
+      onSuccess: () => {
+        utils.playlist.getPlaylistVideos.invalidate();
+      },
+      onError: (error, _, context) => {
+        if (context?.previousPlaylist) {
+          utils.playlist.getPlaylistVideos.setInfiniteData(
+            {
+              playlistId,
+              limit: DEFAULT_LIMIT,
+            },
+            {
+              pages: [
+                {
+                  items: context.previousPlaylist,
+                  nextCursor: playlist?.pages[0]?.nextCursor ?? null,
+                },
+              ],
+              pageParams: [null],
+            }
+          );
+        }
+
+        toast.error(error.message || "Failed to remove video from playlist");
+      },
+    });
   const [playlist, resultsQuery] =
     trpc.playlist.getPlaylistVideos.useSuspenseInfiniteQuery(
       {
@@ -47,6 +113,24 @@ const PlaylistSectionSuspense: React.FC<PlaylistSectionProps> = ({
     );
 
   const playlistVideos = playlist.pages.flatMap((page) => page.items);
+  const handleRemoveFromPlaylist = (
+    playlistName: string,
+    videoName: string,
+    playlistId: string,
+    videoId: string
+  ) => {
+    removeFromPlaylistMutation.mutate(
+      { playlistId, videoId },
+      {
+        onSuccess: () => {
+          toast.success(`${videoName} removed from ${playlistName}`);
+        },
+        onError: () => {
+          toast.error(`Failed to remove ${videoName} from ${playlistName}`);
+        },
+      }
+    );
+  };
 
   return (
     <Fragment>
@@ -62,8 +146,15 @@ const PlaylistSectionSuspense: React.FC<PlaylistSectionProps> = ({
             key={playlist.video.id}
             playlist={playlist}
             size="compact"
-            // onRemove={() => handleRemoveFromHistory(video.id)}
-            // isPending={removeFromHistoryMutation.isPending}
+            onRemove={() =>
+              handleRemoveFromPlaylist(
+                playlist.name,
+                playlist.video.title,
+                playlistId,
+                playlist.video.id
+              )
+            }
+            isPending={removeFromPlaylistMutation.isPending}
           />
         ))}
       </div>
@@ -72,8 +163,15 @@ const PlaylistSectionSuspense: React.FC<PlaylistSectionProps> = ({
           <PlaylistGridCard
             key={playlist.video.id}
             playlist={playlist}
-            // onRemove={() => handleRemoveFromHistory(video.id)}
-            // isPending={removeFromHistoryMutation.isPending}
+            onRemove={() =>
+              handleRemoveFromPlaylist(
+                playlist.name,
+                playlist.video.title,
+                playlistId,
+                playlist.video.id
+              )
+            }
+            isPending={removeFromPlaylistMutation.isPending}
           />
         ))}
       </div>
