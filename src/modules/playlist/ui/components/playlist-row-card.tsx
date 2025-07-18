@@ -1,189 +1,43 @@
-import { Skeleton } from "@/components/ui/skeleton";
+import { adaptPlaylistToMediaItem } from "@/modules/shared/types/media";
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { UserAvatar } from "@/components/user-avatar";
-import { cn, formatNumber } from "@/lib/utils";
-import { UserInfo } from "@/modules/users/ui/components/user-info";
-import { cva, VariantProps } from "class-variance-authority";
-import Link from "next/link";
-import { useMemo } from "react";
+  MediaRowCard,
+  MediaRowCardSkeleton,
+} from "@/modules/shared/ui/components/media-row-card";
 import { TGetOnePlaylistOutput } from "../../types";
 
-import { VideoMenus } from "@/modules/videos/ui/components/video-menus";
-import {
-  VideoThumbnail,
-  VideoThumbnailSkeleton,
-} from "@/modules/videos/ui/components/video-thumbnail";
-
-const playlistRowCardVariants = cva("group flex min-w-0", {
-  variants: {
-    size: {
-      default: "gap-4",
-      compact: "gap-2",
-    },
-  },
-  defaultVariants: {
-    size: "default",
-  },
-});
-
-const thumbnailVariants = cva("relative flex-none", {
-  variants: {
-    size: {
-      default: "w-[38%]",
-      compact: "w-[168px]",
-    },
-  },
-  defaultVariants: {
-    size: "default",
-  },
-});
-
-interface PlaylistRowCardProps
-  extends VariantProps<typeof playlistRowCardVariants> {
+interface PlaylistRowCardProps {
   playlist: TGetOnePlaylistOutput[number];
   onRemove?: () => void;
   isPending?: boolean;
+  size?: "default" | "compact";
 }
 
+interface PlaylistRowCardSkeletonProps {
+  size?: "default" | "compact";
+}
+
+// Wrapper skeleton component for backwards compatibility
 export const PlaylistRowCardSkeleton = ({
   size = "default",
-}: VariantProps<typeof playlistRowCardVariants>) => {
-  return (
-    <div className={cn(playlistRowCardVariants({ size }))}>
-      <div className={cn(thumbnailVariants({ size }))}>
-        <VideoThumbnailSkeleton />
-      </div>
-      <div className="flex-1 min-w-0">
-        <div className="flex justify-between gap-x-2">
-          <div className="flex-1 min-w-0">
-            <Skeleton
-              className={cn("h-4 w-[40%]", size === "compact" && "h-3 w-[40%]")}
-            />
-            {size === "default" && (
-              <>
-                <Skeleton className={cn("h-4 w-[20%] mt-1")} />
-                <div className="flex items-center gap-2 my-3">
-                  <Skeleton className="size-8 rounded-full" />
-                  <Skeleton className="h-4 w-24" />
-                </div>
-              </>
-            )}
-
-            {size === "compact" && (
-              <>
-                <Skeleton className={cn("h-4 w-[50%] mt-1")} />
-              </>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+}: PlaylistRowCardSkeletonProps) => {
+  return <MediaRowCardSkeleton size={size} />;
 };
+
+// Wrapper component that adapts playlist data to unified interface
 export const PlaylistRowCard: React.FC<PlaylistRowCardProps> = ({
   playlist,
   onRemove,
   size = "default",
   isPending,
 }) => {
-  const memoizedViewsAndLikes = useMemo(() => {
-    return {
-      compactViews: formatNumber(playlist.viewCount, { notation: "compact" }),
-      compactLikes: formatNumber(playlist.likeCount, { notation: "compact" }),
-    };
-  }, [playlist]);
+  const mediaItem = adaptPlaylistToMediaItem(playlist);
+
   return (
-    <div className={cn(playlistRowCardVariants({ size }))}>
-      <Link
-        href={`/videos/${playlist.video.id}`}
-        className={cn(thumbnailVariants({ size }))}
-      >
-        <VideoThumbnail
-          thumbnailUrl={playlist.video.thumbnailUrl}
-          title={playlist.video.title}
-          duration={playlist.video.duration}
-          previewUrl={playlist.video.previewUrl}
-        />
-      </Link>
-
-      {/*Info*/}
-      <div className="flex-1 min-w-0">
-        <div className="flex justify-between gap-x-2">
-          <Link
-            href={`/videos/${playlist.video.id}`}
-            className="flex-1 min-w-0"
-          >
-            <h3
-              className={cn(
-                "line-clamp-2 font-medium",
-                size === "compact" ? "text-sm" : "text-base"
-              )}
-            >
-              {playlist.video.title}
-            </h3>
-            {size === "default" && (
-              <p className="text-xs text-muted-foreground mt-1">
-                {memoizedViewsAndLikes.compactViews} views •{" "}
-                {memoizedViewsAndLikes.compactLikes} likes
-              </p>
-            )}
-
-            {size === "default" && (
-              <>
-                <div className="flex items-center gap--2 my-3">
-                  <UserAvatar
-                    imageUrl={playlist.user.imageUrl}
-                    name={playlist.user.firstName ?? ""}
-                    size="sm"
-                  />
-                </div>
-                <Tooltip>
-                  <TooltipTrigger>
-                    <p className="text-xs text-muted-foreground w-fit line-clamp-2 text-pretty max-w-md text-start">
-                      {playlist.video.description ?? "No description"}
-                    </p>
-                  </TooltipTrigger>
-                  <TooltipContent
-                    side="bottom"
-                    align="center"
-                    className="bg-black/70"
-                  >
-                    <p>From video description</p>
-                  </TooltipContent>
-                </Tooltip>
-              </>
-            )}
-
-            {size === "compact" && (
-              <UserInfo
-                name={
-                  `${playlist.user.firstName} ${playlist.user.lastName}` || ""
-                }
-                size="sm"
-              />
-            )}
-
-            {size === "compact" && (
-              <p className="text-xs text-muted-foreground mt-1">
-                {memoizedViewsAndLikes.compactViews} views •{" "}
-                {memoizedViewsAndLikes.compactLikes} likes
-              </p>
-            )}
-          </Link>
-
-          <div className="flex-none">
-            <VideoMenus
-              videoId={playlist.video.id}
-              onRemove={onRemove}
-              isPending={isPending}
-            />
-          </div>
-        </div>
-      </div>
-    </div>
+    <MediaRowCard
+      item={mediaItem}
+      onRemove={onRemove}
+      size={size}
+      isPending={isPending}
+    />
   );
 };
