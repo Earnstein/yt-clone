@@ -652,6 +652,7 @@ export const playlistRouter = createTRPCRouter({
         db
           .select({
             videoId: playlistVideos.videoId,
+            ...getTableColumns(playlists),
           })
           .from(playlistVideos)
           .innerJoin(playlists, eq(playlistVideos.playlistId, playlists.id))
@@ -683,6 +684,9 @@ export const playlistRouter = createTRPCRouter({
               eq(videoReactions.type, "dislike")
             )
           ),
+          playlistName: playlistWithVideos.name,
+          playlistDescription: playlistWithVideos.description,
+          playlistVisibility: playlistWithVideos.visibility,
         })
         .from(videos)
         .innerJoin(users, eq(videos.userId, users.id))
