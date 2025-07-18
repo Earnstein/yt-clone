@@ -11,11 +11,12 @@ import { cva, VariantProps } from "class-variance-authority";
 import Link from "next/link";
 import { useMemo } from "react";
 import { TGetOnePlaylistOutput } from "../../types";
-import {
-  PlaylistThumbnail,
-  PlaylistThumbnailSkeleton,
-} from "./playlist-thumbnail";
+
 import { VideoMenus } from "@/modules/videos/ui/components/video-menus";
+import {
+  VideoThumbnail,
+  VideoThumbnailSkeleton,
+} from "@/modules/videos/ui/components/video-thumbnail";
 
 const playlistRowCardVariants = cva("group flex min-w-0", {
   variants: {
@@ -54,7 +55,7 @@ export const PlaylistRowCardSkeleton = ({
   return (
     <div className={cn(playlistRowCardVariants({ size }))}>
       <div className={cn(thumbnailVariants({ size }))}>
-        <PlaylistThumbnailSkeleton />
+        <VideoThumbnailSkeleton />
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex justify-between gap-x-2">
@@ -101,7 +102,7 @@ export const PlaylistRowCard: React.FC<PlaylistRowCardProps> = ({
         href={`/videos/${playlist.video.id}`}
         className={cn(thumbnailVariants({ size }))}
       >
-        <PlaylistThumbnail
+        <VideoThumbnail
           thumbnailUrl={playlist.video.thumbnailUrl}
           title={playlist.video.title}
           duration={playlist.video.duration}

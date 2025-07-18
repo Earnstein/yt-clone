@@ -1,10 +1,10 @@
+import {
+  VideoThumbnail,
+  VideoThumbnailSkeleton,
+} from "@/modules/videos/ui/components/video-thumbnail";
 import Link from "next/link";
 import { TGetOnePlaylistOutput } from "../../types";
 import { PlaylistInfo, PlaylistSkeleton } from "./playlist-info";
-import {
-  PlaylistThumbnail,
-  PlaylistThumbnailSkeleton,
-} from "./playlist-thumbnail";
 
 interface PlaylistGridCardProps {
   playlist: TGetOnePlaylistOutput[number];
@@ -15,7 +15,7 @@ interface PlaylistGridCardProps {
 export const PlaylistGridCardSkeleton = () => {
   return (
     <div className="flex flex-col gap-2 w-full">
-      <PlaylistThumbnailSkeleton />
+      <VideoThumbnailSkeleton />
       <PlaylistSkeleton />
     </div>
   );
@@ -29,7 +29,7 @@ export const PlaylistGridCard: React.FC<PlaylistGridCardProps> = ({
   return (
     <div className="flex flex-col gap-2 w-full group">
       <Link href={`/videos/${playlist.video.id}`}>
-        <PlaylistThumbnail
+        <VideoThumbnail
           thumbnailUrl={playlist.video.thumbnailUrl}
           title={playlist.video.title}
           duration={playlist.video.duration}
