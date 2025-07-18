@@ -1,6 +1,8 @@
 import { DEFAULT_LIMIT } from "@/lib/constants";
-import { PlaylistView } from "@/modules/playlist/ui/views/playlist-view";
+import { PlaylistsView } from "@/modules/playlist/ui/views/playlists-view";
 import { HydrateClient, trpc } from "@/trpc/server";
+
+export const dynamic = "force-dynamic";
 
 const Page = () => {
   void trpc.playlist.getPlaylists.prefetchInfinite({
@@ -8,7 +10,7 @@ const Page = () => {
   });
   return (
     <HydrateClient>
-      <PlaylistView />
+      <PlaylistsView />
     </HydrateClient>
   );
 };
