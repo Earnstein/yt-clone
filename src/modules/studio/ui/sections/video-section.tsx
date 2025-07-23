@@ -142,18 +142,18 @@ const VideoSectionSuspense: React.FC<VideoSectionProps> = ({ videoId }) => {
   const [video] = trpc.studio.getVideoById.useSuspenseQuery({ id: videoId });
   const [categories] = trpc.categories.getAll.useSuspenseQuery();
 
-  const invalidateVideos = () => {
+  const invalidateVideos = async () => {
     utils.home.getTrendingVideos.invalidate();
     utils.home.getHomeVideos.invalidate();
     utils.studio.getAllVideos.invalidate();
+    utils.studio.getVideoById.invalidate({ id: videoId });
   };
 
   // Mutations
   const updateVideoMutation = trpc.videos.updateVideo.useMutation({
-    onSuccess: () => {
+    onSuccess: async () => {
       toast.success("Video updated successfully");
-      invalidateVideos();
-      utils.studio.getVideoById.invalidate({ id: videoId });
+      await invalidateVideos();
     },
     onError: (error) => {
       toast.error(error.message);
@@ -217,7 +217,7 @@ const VideoSectionSuspense: React.FC<VideoSectionProps> = ({ videoId }) => {
   });
 
   const onSubmit = (data: TUpdateVideo) => {
-    updateVideoMutation.mutate(data);
+    return updateVideoMutation.mutate(data);
   };
 
   const url = `${APP_URL}/videos/${videoId}`;
