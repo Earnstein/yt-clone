@@ -1,8 +1,10 @@
 "use client";
 
 import { InfiniteScroll } from "@/components/infinite-scroll";
+import { Button } from "@/components/ui/button";
 import { DEFAULT_LIMIT } from "@/lib/constants";
 import { trpc } from "@/trpc/client";
+import { useRouter } from "next/navigation";
 import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import {
@@ -18,6 +20,32 @@ interface SuggestionsSectionProps {
   videoId: string;
   isManual?: boolean;
 }
+
+const SuggestionsSectionError = () => {
+  const router = useRouter();
+  return (
+    <div className="flex flex-col items-center justify-center py-12 px-4 gap-4">
+      <div className="flex flex-col items-center justify-center gap-2">
+        <h3 className="text-lg font-semibold text-foreground">
+          Oh snap! An error just occurred
+        </h3>
+        <p className="text-sm text-muted-foreground text-center max-w-md">
+          We couldn&apos;t load the suggestions right now. Please try refreshing
+          the page.
+        </p>
+      </div>
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => {
+          router.refresh();
+        }}
+      >
+        Refresh
+      </Button>
+    </div>
+  );
+};
 
 const SuggestionsSkeleton = () => {
   return (
@@ -77,7 +105,7 @@ export const SuggestionsSection: React.FC<SuggestionsSectionProps> = ({
 }) => {
   return (
     <Suspense fallback={<SuggestionsSkeleton />}>
-      <ErrorBoundary fallback={<div>Error</div>}>
+      <ErrorBoundary fallback={<SuggestionsSectionError />}>
         <SuggestionsSectionSuspense videoId={videoId} isManual={isManual} />
       </ErrorBoundary>
     </Suspense>
