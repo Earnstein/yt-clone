@@ -15,7 +15,7 @@ interface VideoOwnerProps {
 
 export const VideoOwner: React.FC<VideoOwnerProps> = ({ user, videoId }) => {
   const { userId, isLoaded } = useAuth();
-  const { onSubscribe } = useSubscription({
+  const { onSubscribe, isPending } = useSubscription({
     userId: user.id,
     isSubscribed: user.viewerSubscribed,
     fromVideoId: videoId,
@@ -50,7 +50,7 @@ export const VideoOwner: React.FC<VideoOwnerProps> = ({ user, videoId }) => {
       ) : (
         <SubscriptionButton
           onClick={onSubscribe}
-          disabled={!isLoaded}
+          disabled={!isLoaded || isPending}
           isSubscribed={user.viewerSubscribed}
           className="flex-none"
         />
