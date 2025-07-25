@@ -251,6 +251,7 @@ export const videosRouter = createTRPCRouter({
       }
 
       // Create a new Mux upload for the video
+      //TODO: to whitelist uploads to only allow videos from the app
       const upload = await mux.video.uploads.create({
         new_asset_settings: {
           passthrough: videoId,
