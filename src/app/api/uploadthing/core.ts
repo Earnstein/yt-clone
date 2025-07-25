@@ -83,6 +83,47 @@ export const ourFileRouter = {
       // Whatever is returned here is sent to the clientside `onClientUploadComplete` callback
       return { uploadedBy: metadata.user.id };
     }),
+
+  userBannerUploader: f({
+    image: {
+      maxFileSize: "4MB",
+      maxFileCount: 1,
+    },
+  })
+    .input(
+      z.object({
+        userId: z.string(),
+      })
+    )
+    .middleware(async () => {
+      const { userId } = await auth();
+      const utApi = new UTApi();
+      if (!userId) throw new UploadThingError("Unauthorized");
+
+      const [user] = await db.select().from(users).where(eq(users.id, userId));
+
+      if (user.bannerKey) {
+        await utApi.deleteFiles([user.bannerKey]);
+        await db
+          .update(users)
+          .set({ bannerKey: null, bannerUrl: null })
+          .where(eq(users.id, userId));
+      }
+
+      return { userId: user.id };
+    })
+    .onUploadComplete(async ({ metadata, file }) => {
+      // Update the user to add the banner and key
+      await db
+        .update(users)
+        .set({
+          bannerUrl: file.ufsUrl,
+          bannerKey: file.key,
+        })
+        .where(eq(users.id, metadata.userId));
+
+      return { uploadedBy: metadata.userId };
+    }),
 } satisfies FileRouter;
 
 export type OurFileRouter = typeof ourFileRouter;
