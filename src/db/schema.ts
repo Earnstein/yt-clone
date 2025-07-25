@@ -20,9 +20,10 @@ import {
 export const users = pgTable("users", {
   id: text("id").primaryKey(),
   email: varchar("email", { length: 100 }).notNull().unique(),
-  firstName: varchar("first_name", { length: 100 }),
-  lastName: varchar("last_name", { length: 100 }),
-  // TODO: add banner field
+  firstName: varchar("first_name", { length: 64 }),
+  lastName: varchar("last_name", { length: 64 }),
+  bannerUrl: varchar("banner_url", { length: 255 }),
+  bannerKey: varchar("banner_key", { length: 255 }),
   imageUrl: varchar("image_url", { length: 255 }).notNull(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),

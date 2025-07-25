@@ -46,7 +46,6 @@ export const StudioUploadVideoModal = ({ videoId }: StudioUploadVideoProps) => {
   };
   return (
     <>
-      {" "}
       <ResponsiveModal
         open={!!mutation.data?.url}
         title="Upload Video"

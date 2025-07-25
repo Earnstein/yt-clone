@@ -11,12 +11,10 @@ interface VideoInfoProps {
   isPending?: boolean;
 }
 
-// Wrapper skeleton component for backwards compatibility
 export const VideoInfoSkeleton = () => {
   return <MediaInfoSkeleton />;
 };
 
-// Wrapper component that adapts video data to unified interface
 export const VideoInfo: React.FC<VideoInfoProps> = ({
   video,
   onRemove,

@@ -5,4 +5,4 @@ export type TGetOneVideoOutput =
   inferRouterOutputs<AppRouter>["videos"]["getOne"];
 
 export type TGetManyVideosOutput =
-  inferRouterOutputs<AppRouter>["suggestions"]["getSuggestions"]; //TODO: To change to videos getmany
+  inferRouterOutputs<AppRouter>["home"]["getHomeVideos"];

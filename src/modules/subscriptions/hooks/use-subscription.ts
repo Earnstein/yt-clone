@@ -45,6 +45,13 @@ export const useSubscription = ({
 
       return { prevData };
     },
+    onSuccess: () => {
+      if (fromVideoId) {
+        utils.videos.getOne.invalidate({ id: fromVideoId });
+      }
+      utils.home.getSubscriptionsVideos.invalidate();
+      utils.users.getOne.invalidate({ id: userId });
+    },
     onError: (error, _, context) => {
       // Rollback to the previous value
       if (fromVideoId && context?.prevData) {
@@ -56,13 +63,6 @@ export const useSubscription = ({
       } else {
         toast.error("Something went wrong");
       }
-    },
-    onSettled: () => {
-      // Invalidate related queries
-      if (fromVideoId) {
-        utils.videos.getOne.invalidate({ id: fromVideoId });
-      }
-      utils.home.getSubscriptionsVideos.invalidate();
     },
   });
 
@@ -95,6 +95,13 @@ export const useSubscription = ({
 
       return { prevData };
     },
+    onSuccess: () => {
+      if (fromVideoId) {
+        utils.videos.getOne.invalidate({ id: fromVideoId });
+      }
+      utils.home.getSubscriptionsVideos.invalidate();
+      utils.users.getOne.invalidate({ id: userId });
+    },
     onError: (error, _, context) => {
       // Rollback to the previous value
       if (fromVideoId && context?.prevData) {
@@ -106,13 +113,6 @@ export const useSubscription = ({
       } else {
         toast.error("Something went wrong");
       }
-    },
-    onSettled: () => {
-      // Invalidate related queries
-      if (fromVideoId) {
-        utils.videos.getOne.invalidate({ id: fromVideoId });
-      }
-      utils.home.getSubscriptionsVideos.invalidate();
     },
   });
 
