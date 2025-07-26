@@ -51,6 +51,7 @@ export const useSubscription = ({
       }
       utils.home.getSubscriptionsVideos.invalidate();
       utils.users.getOne.invalidate({ id: userId });
+      utils.subscriptions.getSubscribers.invalidate();
     },
     onError: (error, _, context) => {
       // Rollback to the previous value
@@ -101,6 +102,7 @@ export const useSubscription = ({
       }
       utils.home.getSubscriptionsVideos.invalidate();
       utils.users.getOne.invalidate({ id: userId });
+      utils.subscriptions.getSubscribers.invalidate();
     },
     onError: (error, _, context) => {
       // Rollback to the previous value
