@@ -39,7 +39,7 @@ const SearchInput = () => {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />
-        {/*TODO: Add add remove search button*/}
+
         {query.trim() && (
           <Button
             variant="ghost"
