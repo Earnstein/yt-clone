@@ -1,12 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { UserAvatar } from "@/components/user-avatar";
-import { getFullName } from "@/lib/utils";
+import { formatNumber, getFullName } from "@/lib/utils";
 import { useSubscription } from "@/modules/subscriptions/hooks/use-subscription";
 import { SubscriptionButton } from "@/modules/subscriptions/ui/components/subscription-button";
 import { UserInfo } from "@/modules/users/ui/components/user-info";
 import { useAuth } from "@clerk/nextjs";
 import Link from "next/link";
-import React from "react";
+import React, { useMemo } from "react";
 import { TGetOneVideoOutput } from "../../types";
 interface VideoOwnerProps {
   user: TGetOneVideoOutput["user"];
@@ -15,6 +15,13 @@ interface VideoOwnerProps {
 
 export const VideoOwner: React.FC<VideoOwnerProps> = ({ user, videoId }) => {
   const { userId, isLoaded } = useAuth();
+  const memoizedCount = useMemo(() => {
+    return {
+      subscriberCount: formatNumber(user.subscriberCount, {
+        notation: "compact",
+      }),
+    };
+  }, [user.subscriberCount]);
   const { onSubscribe, isPending } = useSubscription({
     userId: user.id,
     isSubscribed: user.viewerSubscribed,
@@ -35,8 +42,7 @@ export const VideoOwner: React.FC<VideoOwnerProps> = ({ user, videoId }) => {
           <div className="space-y-1 min-w-0">
             <UserInfo name={getFullName(user)} size="lg" />
             <span className="text-sm text-muted-foreground line-clamp-1">
-              {/* TODO: to build subscribers count */}
-              {user.subscriberCount} subscribers
+              {memoizedCount.subscriberCount} subscribers
             </span>
           </div>
         </div>

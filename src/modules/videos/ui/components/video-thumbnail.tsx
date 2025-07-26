@@ -50,8 +50,6 @@ export const VideoThumbnail: React.FC<VideoThumbnailProps> = ({
       <div className="absolute bottom-2 right-2 bg-black/80 text-white text-xs font-medium rounded">
         {formatDuration(duration)}
       </div>
-
-      {/* TODO: Add video duration box*/}
     </div>
   );
 };
