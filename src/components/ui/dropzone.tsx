@@ -438,7 +438,6 @@ const DropZoneArea = forwardRef<HTMLDivElement, DropZoneAreaProps>(
       // A11y behavior is handled through Trigger. All of these are only relevant to drag and drop which means this should be fine?
       <div
         ref={(instance) => {
-          // TODO: test if this actually works?
           ref.current = instance;
           if (typeof forwardedRef === "function") {
             forwardedRef(instance);
@@ -795,7 +794,6 @@ const InfiniteProgress = forwardRef<HTMLDivElement, InfiniteProgressProps>(
         )}
       >
         <div
-          //   TODO: add proper done transition
           className={cn(
             "h-full w-full rounded-full bg-primary",
             done ? "translate-x-0" : "animate-infinite-progress",
