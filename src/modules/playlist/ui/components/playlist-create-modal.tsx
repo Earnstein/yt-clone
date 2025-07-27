@@ -50,7 +50,6 @@ export const PlaylistCreateModal: React.FC<PlaylistCreateModalProps> = ({
     resolver: zodResolver(createPlaylistSchema),
   });
   const utils = trpc.useUtils();
-  //TODO: to implement optimistic UI for playlist creation
 
   const mutation = trpc.playlist.createPlaylist.useMutation({
     onSuccess: (_, variables) => {
