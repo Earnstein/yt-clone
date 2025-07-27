@@ -290,10 +290,7 @@ const VideoSectionSuspense: React.FC<VideoSectionProps> = ({ videoId }) => {
                 name="title"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>
-                      Title
-                      {/* TODO: Add AI generate button */}
-                    </FormLabel>
+                    <FormLabel>Title</FormLabel>
                     <FormControl>
                       <Input {...field} placeholder="Edit your video title" />
                     </FormControl>
@@ -306,10 +303,7 @@ const VideoSectionSuspense: React.FC<VideoSectionProps> = ({ videoId }) => {
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>
-                      Description
-                      {/* TODO: Add AI generate button */}
-                    </FormLabel>
+                    <FormLabel>Description</FormLabel>
                     <FormControl>
                       <Textarea
                         {...field}
@@ -323,7 +317,6 @@ const VideoSectionSuspense: React.FC<VideoSectionProps> = ({ videoId }) => {
                 )}
               />
 
-              {/* TODO: Add thumbnail field here */}
               <FormField
                 control={form.control}
                 name="thumbnailUrl"
