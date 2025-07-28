@@ -36,7 +36,7 @@ export const PlaylistThumbnail: React.FC<PlaylistThumbnailProps> = ({
     };
   }, [videoCount]);
   return (
-    <Link href={`/playlists/${playlistId}`}>
+    <Link prefetch href={`/playlists/${playlistId}`}>
       <div className={cn("relative pt-3", className)}>
         {/* STACK EFFECT CARD LAYOUT */}
         <div className="relative">

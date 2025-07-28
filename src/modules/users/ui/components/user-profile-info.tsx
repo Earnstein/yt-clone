@@ -74,7 +74,7 @@ export const UserProfileInfo: React.FC<UserProfileInfoProps> = ({ user }) => {
         </div>
         {userId === user.id ? (
           <div className="mt-4">
-            <Link href="/studio">
+            <Link prefetch href="/studio">
               <Button variant="secondary" className="w-full mt-3 rounded-full">
                 Go to Studio
               </Button>
@@ -116,7 +116,7 @@ export const UserProfileInfo: React.FC<UserProfileInfoProps> = ({ user }) => {
           </div>
 
           {userId === user.id ? (
-            <Link href="/studio">
+            <Link prefetch href="/studio">
               <Button variant="secondary" className="mt-3 rounded-full">
                 Go to Studio
               </Button>

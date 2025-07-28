@@ -40,7 +40,7 @@ export const MediaInfo: React.FC<MediaInfoProps> = ({
 
   return (
     <div className="flex gap-3">
-      <Link href={`/users/${item.user.id}`}>
+      <Link prefetch href={`/users/${item.user.id}`}>
         <UserAvatar
           imageUrl={item.user.imageUrl ?? ""}
           name={item.user.firstName ?? ""}
@@ -48,15 +48,15 @@ export const MediaInfo: React.FC<MediaInfoProps> = ({
       </Link>
 
       <div className="min-w-0 flex-1">
-        <Link href={`/videos/${item.id}`}>
+        <Link prefetch href={`/videos/${item.id}`}>
           <h3 className="font-medium line-clamp-1 lg:line-clamp-2 text-base break-words">
             {item.title}
           </h3>
         </Link>
-        <Link href={`/users/${item.user.id}`}>
+        <Link prefetch href={`/users/${item.user.id}`}>
           <UserInfo name={item.user.firstName ?? ""} />
         </Link>
-        <Link href={`/videos/${item.id}`}>
+        <Link prefetch href={`/videos/${item.id}`}>
           <p className="text-sm text-gray-600 line-clamp-1">
             {memoizedValues.compactViews} views • {memoizedValues.compactDate}
           </p>

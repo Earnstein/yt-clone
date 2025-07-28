@@ -113,7 +113,11 @@ export const SubscriptionsSection = () => {
           ))}
           <SidebarMenuItem>
             <SidebarMenuButton asChild isActive={pathname === "/subscriptions"}>
-              <Link href="/subscriptions" className="flex gap-4 items-center">
+              <Link
+                prefetch
+                href="/subscriptions"
+                className="flex gap-4 items-center"
+              >
                 <ListIcon className="size-4" />
                 <span className="text-sm">All Subscriptions</span>
               </Link>

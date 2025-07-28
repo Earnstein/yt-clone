@@ -84,7 +84,7 @@ export const CommentItem: React.FC<CommentItemProps> = ({
   return (
     <div className={cn("flex flex-col gap-2", isPending && "opacity-50")}>
       <div className="flex gap-4">
-        <Link href={`/users/${comment.userId}`}>
+        <Link prefetch href={`/users/${comment.userId}`}>
           <UserAvatar
             imageUrl={comment.user.imageUrl}
             name={getFullName(comment.user) || "user"}
@@ -92,7 +92,7 @@ export const CommentItem: React.FC<CommentItemProps> = ({
           />
         </Link>
         <div className="flex-1 min-w-0">
-          <Link href={`/users/${comment.userId}`}>
+          <Link prefetch href={`/users/${comment.userId}`}>
             <p className="flex items-center gap-2 mb-0.5">
               <span className="text-sm font-medium line-clamp-1 text-ellipsis">
                 {getFullName(comment.user)}

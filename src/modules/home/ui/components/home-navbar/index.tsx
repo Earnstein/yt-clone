@@ -11,7 +11,7 @@ export const HomeNavbar = () => {
         {/*Menu and Logo*/}
         <div className="flex flex-shrink-0 items-center">
           <SidebarTrigger />
-          <Link href="/">
+          <Link prefetch href="/" className="hidden md:block">
             <div className="flex gap-1 items-center p-4">
               <Image
                 src="/yt.svg"

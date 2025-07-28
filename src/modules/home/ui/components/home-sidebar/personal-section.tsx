@@ -56,7 +56,11 @@ export const PersonalSection = () => {
                   }
                 }}
               >
-                <Link href={item.url} className="flex gap-4 items-center">
+                <Link
+                  prefetch
+                  href={item.url}
+                  className="flex gap-4 items-center"
+                >
                   <item.icon />
                   <span className="text-sm">{item.title}</span>
                 </Link>
