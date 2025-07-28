@@ -1,6 +1,7 @@
 import { DEFAULT_LIMIT } from "@/lib/constants";
 import { UserSubscriptionsView } from "@/modules/subscriptions/ui/view/user-subscriptions-view";
 import { HydrateClient, trpc } from "@/trpc/server";
+export const dynamic = "force-dynamic";
 
 const SubscriptionsPage = async () => {
   void trpc.subscriptions.getSubscribers.prefetchInfinite({

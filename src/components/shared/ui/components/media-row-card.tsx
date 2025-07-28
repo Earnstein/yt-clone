@@ -113,7 +113,7 @@ export const MediaRowCard: React.FC<MediaRowCardProps> = ({
       {/*Info*/}
       <div className="flex-1 min-w-0">
         <div className="flex justify-between gap-x-2">
-          <Link href={`/videos/${item.id}`} className="flex-1 min-w-0">
+          <Link prefetch href={`/videos/${item.id}`} className="flex-1 min-w-0">
             <h3
               className={cn(
                 "line-clamp-2 font-medium",

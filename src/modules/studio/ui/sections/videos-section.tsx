@@ -95,7 +95,7 @@ const VideoSectionSuspense = () => {
               page.items.map((video) => (
                 <TableRow key={video.id} className="hover:bg-muted/50">
                   <TableCell>
-                    <Link href={`/studio/videos/${video.id}`}>
+                    <Link prefetch href={`/studio/videos/${video.id}`}>
                       <div className="flex items-center gap-4">
                         <div className="relative size-36 aspect-video shrink-0 place-content-center">
                           <VideoThumbnail

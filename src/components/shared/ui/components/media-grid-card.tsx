@@ -28,7 +28,7 @@ export const MediaGridCard: React.FC<MediaGridCardProps> = ({
 }) => {
   return (
     <div className="flex flex-col gap-2 w-full group">
-      <Link href={`/videos/${item.id}`}>
+      <Link prefetch href={`/videos/${item.id}`}>
         <VideoThumbnail
           thumbnailUrl={item.thumbnailUrl}
           title={item.title}

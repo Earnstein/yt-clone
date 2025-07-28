@@ -32,7 +32,7 @@ export const VideoOwner: React.FC<VideoOwnerProps> = ({ user, videoId }) => {
   const isOwner = userId === user.id;
   return (
     <div className="flex gap-3 justify-between items-center min-w-0 sm:items-start sm:justify-start">
-      <Link href={`/users/${user.id}`}>
+      <Link prefetch href={`/users/${user.id}`}>
         <div className="flex gap-2 items-center">
           <UserAvatar
             imageUrl={user.imageUrl}
@@ -48,7 +48,7 @@ export const VideoOwner: React.FC<VideoOwnerProps> = ({ user, videoId }) => {
         </div>
       </Link>
       {isOwner ? (
-        <Link href={`/studio/videos/${videoId}`}>
+        <Link prefetch href={`/studio/videos/${videoId}`}>
           <Button variant="secondary" className="rounded-full">
             Edit video
           </Button>

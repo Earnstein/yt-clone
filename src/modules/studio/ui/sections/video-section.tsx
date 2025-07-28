@@ -436,7 +436,7 @@ const VideoSectionSuspense: React.FC<VideoSectionProps> = ({ videoId }) => {
                       </p>
 
                       <div className="flex items-center gap-x-2">
-                        <Link href={`/videos/${videoId}`}>
+                        <Link prefetch href={`/videos/${videoId}`}>
                           <p className="text-xs sm:text-sm line-clamp-1 text-blue-500">
                             {url}
                           </p>
