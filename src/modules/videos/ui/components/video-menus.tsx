@@ -25,7 +25,6 @@ interface VideoMenuProps {
   isPending?: boolean;
 }
 
-// TODO: Add a playlist menu item
 export const VideoMenus: React.FC<VideoMenuProps> = ({
   videoId,
   variant = "ghost",

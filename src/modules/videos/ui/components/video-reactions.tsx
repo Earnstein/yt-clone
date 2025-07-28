@@ -14,7 +14,6 @@ interface VideoReactionProps {
   videoId: string;
 }
 
-//TODO: implement videoreaction
 export const VideoReactions: React.FC<VideoReactionProps> = ({
   dislikeCount,
   likeCount,
@@ -26,30 +25,24 @@ export const VideoReactions: React.FC<VideoReactionProps> = ({
 
   const likeMutation = trpc.videoReactions.like.useMutation({
     onMutate: async (likeVideoInput) => {
-      // Stop any in-flight fetches to avoid race conditions
       await utils.videos.getOne.cancel({ id: likeVideoInput.videoId });
 
-      // Save current video data for rollback if needed
       const prevData = utils.videos.getOne.getData({
         id: likeVideoInput.videoId,
       });
 
-      // Update local cache optimistically
       utils.videos.getOne.setData({ id: likeVideoInput.videoId }, (old) => {
         if (!old) return old;
         return {
           ...old,
-          // Toggle like count up/down based on previous state
           likeCount:
             old.viewerReaction === "like"
               ? old.likeCount - 1
               : old.likeCount + 1,
-          // Remove dislike if switching from dislike to like
           dislikeCount:
             old.viewerReaction === "dislike"
               ? old.dislikeCount - 1
               : old.dislikeCount,
-          // Toggle like state on/off
           viewerReaction: old.viewerReaction === "like" ? null : "like",
         };
       });
@@ -78,28 +71,22 @@ export const VideoReactions: React.FC<VideoReactionProps> = ({
 
   const dislikeMutation = trpc.videoReactions.dislike.useMutation({
     onMutate: async (dislikeVideoInput) => {
-      // Stop any in-flight fetches to avoid race conditions
       await utils.videos.getOne.cancel({ id: dislikeVideoInput.videoId });
 
-      // Save current video data for rollback if needed
       const prevData = utils.videos.getOne.getData({
         id: dislikeVideoInput.videoId,
       });
 
-      // Update local cache optimistically
       utils.videos.getOne.setData({ id: dislikeVideoInput.videoId }, (old) => {
         if (!old) return old;
         return {
           ...old,
-          // Toggle dislike count up/down based on previous state
           dislikeCount:
             old.viewerReaction === "dislike"
               ? old.dislikeCount - 1
               : old.dislikeCount + 1,
-          // Remove like if switching from like to dislike
           likeCount:
             old.viewerReaction === "like" ? old.likeCount - 1 : old.likeCount,
-          // Toggle dislike state on/off
           viewerReaction: old.viewerReaction === "dislike" ? null : "dislike",
         };
       });
